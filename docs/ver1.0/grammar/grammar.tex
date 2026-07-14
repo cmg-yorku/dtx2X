@@ -1,0 +1,23 @@
+\documentclass{article}
+\usepackage[most]{tcolorbox}
+\usepackage{xcolor}
+\usepackage{comment}
+\usepackage[normalem]{ulem}
+
+
+\newcommand{\red}[1]{\textcolor{red}{#1}} % for inline text
+\newenvironment{redpar}{\color{red}}{}    % for multi-paragraph blocks
+
+% 1. Define title details in the preamble
+\title{iStar-DT-X ver 1.0}
+\author{Conceptual Modeling Group, York University}
+\date{\today} % Automatically inserts today's date
+
+\begin{document}
+\maketitle
+
+\input{XML-Expressions.tex}
+\input{XML-GoalsTasksQualities.tex}
+\input{XML-Qualities.tex}
+
+\end{document}

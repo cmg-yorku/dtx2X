@@ -1,0 +1,90 @@
+\begin{figure}[p]
+\begin{tcolorbox}[title=iStar-DT-X Grammar,colbacktitle=orange!40!white,coltitle=black,fonttitle=\bfseries,adjusted title=iStarDT-X Grammar (2/3),halign title=flush center]
+
+\rmfamily
+\begin{footnotesize}
+\textbf{Root}
+\end{footnotesize}
+\ttfamily
+\begin{scriptsize}
+\begin{tabbing}
+<actor-attributes> \= ::= \= "name=\"" \= <string> "\"" [" description=\"" <string> "\""] [<namespaces>]\kill
+
+
+\textbf{[istardt-model]} \> ::= \> "<iStarDT " [namespaces] ">" \textbf{[model-header] [options] [actors]} \\ \>\> "</iStarDT>" \\
+\textbf{[namespaces]} \> ::= " xmlns=`" \textbf{[string]} "'" [" xmlns:xsi=`" \textbf{[string]} "'] \\ \>\>[" xsi:schemaLocation= `" \textbf{[string]} "'"]\\
+\textbf{[model-header]} \> ::= \>  "<header title = `" [string] "' author = `" [string] \\\>\> "' source = `" [string] "' lastUpdated=`" [string] "'>" \\\>\> [string] "</header>"\\
+\textbf{[options]} \> ::= \>  "<options continuous = `" [boolean] "' \\\>\> infeasibleActionPenalty = `" [decimal] "'>\\\>\> </options>"\\
+\textbf{[actors]} \> ::= \> "<actors>" \textbf{[actor]}+ "</actors>"\\
+\textbf{[actor]} \> ::= "<actor " \textbf{[actor-attributes]} ">" \textbf{[actor-content]} "</actor>"\\
+\textbf{[actor-attributes]} \> ::= "name=`" \red{[identifier]} "'" [description=`" \red{[string]} "'] \\
+\textbf{[actor-content]} \> ::=  [ \textbf{[goals]} ] [ \textbf{[tasks]} ] [ \textbf{[qualities]} ] 
+					[ \textbf{[predicates]} ] \\ \> \> [ \textbf{[variables]} ] [ \textbf{[condBoxes]} ] [ \textbf{[cross-runs]} ]\\ \> \>  [ \textbf{[exported-set]} ][ \textbf{[initializations]} ] \red{[ \textbf{[definitions]} ]}
+\end{tabbing}
+
+
+
+\rmfamily
+\begin{footnotesize}
+\textbf{Goals}
+\end{footnotesize}
+\ttfamily
+
+\begin{scriptsize}
+\begin{tabbing}
+\textbf{[goal-contenttt]} \= ::= \= [<pre>*] \= [<npr>*] [<refinement>]\kill
+\textbf{[goals]} \> ::= "<goals>" \textbf{[goal]}+ "</goals>" \\
+\textbf{[goal]} \> ::= "<goal name=`" \textbf{[identifier]} "'" [" root=`" \textbf{[boolean]} "'"] \\ \>\> [" description=`" \textbf{[string]} "'"] [" terminal=`" \textbf{[boolean]} "'"] \\\>\> [" episodeLength=`" \textbf{[integer]} "'"] \red{[" actor=`" [identifier] "'"]}\\
+\>\> \red{[" delegation-style=" [del-style] "]} ">" [goal-content] "</goal>"\\
+
+\textbf{[goal-content]} \> ::= \red{[ \textbf{[parameters]} ]} [ \textbf{[pre]} ] [ \textbf{[npr]} ] [ \textbf{[refinement]} ]\\
+\textbf{[pre]} \> ::= "<pre>" \textbf{[boolean-expression]} "</pre>"\\
+\textbf{[npr]} \> ::= "<npr>" \textbf{[boolean-expression]} "</npr>"\\
+\textbf{[refinement]} \> ::= "<refinement type=`" \textbf{[ref-type]} "'>" \\
+\> \> \red{[ [ref-condition] ]} \\
+\> \>(\textbf{[childGoal]} | \textbf{[childTask]})+ "</refinement>"\\
+\red{\textbf{[ref-condition]}} \> ::= \red{"<ref-condition>"  \textbf{[pick-cond]} | \textbf{[forall-cond]} "</ref-condition>"}\\
+\red{\textbf{[pick-cond]}} \> ::= \red{"<pick>" \textbf{[cond-content]} "</pick>"}\\
+\red{\textbf{[forall-cond]}} \> ::= \red{"<forall>" \textbf{[cond-content]} "</forall>"}\\
+\red{\textbf{[cond-content]}} \> ::= \red{"<params>" \textbf{[cond-param]+} "</params>"} \\ \>\> \red{"<condition>" \textbf{[cond-pred]} "</condition>"}\\
+\red{\textbf{[cond-param]}} \> ::= \red{"<param>" [identifier] "</param>"} \\
+\red{\textbf{[cond-pred]}} \> ::= \red{"<content>" [identifier] "</content>"} \\
+\textbf{[ref-type]} \> ::= "AND" | "OR" \\
+\textbf{[childGoal]} \> ::= "<childGoal ref=`" \textbf{[identifier]} "'/>" /* reference to goal name */\\
+\textbf{[childTask]} \> ::= "<childTask ref=`" \textbf{[identifier]} "'/>" /* reference to task name */\\
+\red{\textbf{[goal-ref]}} \> ::= \red{"<goal name=`" [identifier] "'>" [parameters] "</goal>"} \\
+\end{tabbing}
+\end{scriptsize}
+
+\rmfamily
+\begin{footnotesize}
+\textbf{Tasks}
+\end{footnotesize}
+\ttfamily
+
+\begin{scriptsize}
+\begin{tabbing}
+<effect-content> \= ::= \= [<turnsTrue>*] [<turnsFalse>*] [<pre>*] [<npr>*]\kill
+
+\textbf{[tasks]} \> ::= \> "<tasks>" [task]+ "</tasks>"\\
+\textbf{[task]} \> ::= "<task name=`" \textbf{[identifier]} "'" [" description=`" [string] "'"] \\
+\>\> \red{[" actor=`" [identifier] "'"] [" delegation-style=" [del-style] "]} \\
+\>\> ">" [task-content] "</task>" \\
+\textbf{[task-content]} \> ::= \red{[ [parameters] ]} [effectGroup] [ [pre] ] [ [npr] ]\\
+\textbf{[effectGroup]} \> ::= "<effectGroup>" [effect]+ "</effectGroup>"\\
+\textbf{[effect]} \> ::= "<effect name=`" \textbf{[identifier]} "'" [ " satisfying=`" \textbf{[boolean]} "'" ] \\ \>\> " probability=`" \textbf{[decimal]} "'" [ " description=`" <string> "'" ] \\
+ \>\>  ">" \textbf{[effect-content]} "</effect>"\\
+\textbf{[effect-content]} \> ::= [ [turnsTrue]* ] [ [turnsFalse]* ] [ [sets]* ] [ [pre] ] [ [npr] ]\\
+\textbf{[turnsTrue]} \> ::= "<turnsTrue>" [identifier] "</turnsTrue>"\\
+\textbf{[turnsFalse]} \> ::= "<turnsFalse>" [identifier] "</turnsFalse>"\\
+\textbf{[sets]} \> ::= "<set>" [variable-id] [num-const] "</set>"\\
+\red{\textbf{[task-ref]}} \> ::= \red{"<task name=`" [identifier] "'>" [parameters] "</task>"} \\
+\end{tabbing}
+\end{scriptsize}
+
+\rmfamily
+
+\end{scriptsize}
+\end{tcolorbox}
+\caption{BNF specification of iStarDT-X: Models, Goals, and Tasks.}\label{fig:iStarDT-X-Goals}
+\end{figure}

@@ -1,0 +1,428 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<iStarDT xmlns="https://example.org/istar-dt-x"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="https://example.org/istar-dt-x ../xsd/istar-rl-schema_v4.xsd">
+
+
+<!--
+*** H E A D E R ***
+-->
+
+<header title = ""
+    author = ""
+    source = ""
+    lastUpdated = "2026-07-12 14:56:25">
+</header>
+
+
+<!--
+*** O P T I O N S ***
+-->
+<options continuous = "true"
+    infeasibleActionPenalty = "100">
+</options>
+
+
+<!--
+*** A C T O R S ***
+-->
+<actors>
+<actor name="default" description="">
+
+
+<!--
+*** G O A L S ***
+-->
+
+<!-- DISTINGUIS maintain, achieve, achieve and maintain, avoid -->
+<goals>
+   <goal name = "meetingOrganized" description = "Meeting Organized (sa,m)" root = "true" terminal = "false" episodeLength = "1">
+   
+   	  <parameters>
+		<parameter>
+			<param-type>schedulingAssistant</param-type>
+			<param-name>sa</param-name>
+		</parameter>
+		<parameter>
+			<param-type>meeting</param-type>
+			<param-name>m</param-name>
+		</parameter>
+	  </parameters>
+   
+      <refinement type = "AND">
+         <childGoal ref = "constraintsCollectedSaM"/>
+         <childGoal ref = "identifyMeetingTimeSaM"/>
+      </refinement>
+   </goal>
+   <goal name = "constraintsCollected" description = "Constraints Collected (sa,m)" root = "false" terminal = "false" episodeLength = "1">
+   
+   	  <parameters>
+		<parameter>
+			<param-type>schedulingAssistant</param-type>
+			<param-name>sa</param-name>
+		</parameter>
+		<parameter>
+			<param-type>meeting</param-type>
+			<param-name>m</param-name>
+		</parameter>
+	  </parameters>
+   
+      <refinement type = "OR">
+         <childGoal ref = "constraintsCollectedByEmail"/>
+         <childGoal ref = "constraintsCollectedByPollingTool"/>
+      </refinement>
+   </goal>
+   
+   <goal name = "constraintsCollectedByEmail" description = "Constraints Collected By Email (sa,m)" root = "false" terminal = "false" episodeLength = "1">
+   	  <parameters>
+		<parameter>
+			<param-type>schedulingAssistant</param-type>
+			<param-name>sa</param-name>
+		</parameter>
+		<parameter>
+			<param-type>meeting</param-type>
+			<param-name>m</param-name>
+		</parameter>
+	  </parameters>
+	  
+      <refinement type = "AND">
+		<ref-condition>
+			<!-- forall p. pp(p) -->
+			<forall>
+				<params>
+					<param>p</param>
+				</params>
+				<condition>
+					<!-- THIS SOULD BE A PREDICATE REFERENCE -->
+					<content>potientialParticipant(p)</content>
+				</condition>
+			</forall>
+		</ref-condition>
+        <childGoal ref = "collectIndividualConstraintsByEmail"/>
+      </refinement>
+	  
+   </goal>
+   
+   <goal name = "constraintsCollectedByPollingTool" description = "Constraints Collected By Polling Tool (sa,m)" root = "false" terminal = "false" episodeLength = "1">
+      	<parameters>
+		<parameter>
+			<param-type>schedulingAssistant</param-type>
+			<param-name>sa</param-name>
+		</parameter>
+		<parameter>
+			<param-type>meeting</param-type>
+			<param-name>m</param-name>
+		</parameter>
+	  </parameters>
+      <refinement type = "OR">
+	  		<ref-condition>
+			<!-- forall t. poolTool(t) -->
+			<pick>
+				<params>
+					<param>t</param>
+				</params>
+				<condition>
+					<!-- THIS SOULD BE A PREDICATE REFERENCE -->
+					<content>pollTool(t)</content>
+				</condition>
+			</pick>
+		</ref-condition>
+         <childTask ref = "collectIndividualConstraintsFromPollingTool"/>
+      </refinement>
+   </goal>
+</goals>
+
+
+<!--
+*** T A S K S ***
+-->
+<tasks>
+   <task name = "collectIndividualConstraintsByEmail" description = "Collect Individual Constraints by Email (sa,p,m)">
+      <parameters>
+		<parameter>
+			<param-type>schedulingAssistant</param-type>
+			<param-name>sa</param-name>
+		</parameter>
+		<parameter>
+			<param-type>potentialParticipant</param-type>
+			<param-name>p</param-name>
+		</parameter>
+		<parameter>
+			<param-type>meeting</param-type>
+			<param-name>m</param-name>
+		</parameter>
+	  </parameters>
+      <effectGroup>
+         <effect name = "individualConstraintsByEmailCollected_Eff" description = "individualConstraintsByEmailCollected(sa, p, m)" satisfying = "true" probability = "0.95">
+		 	<!-- THIS SOULD BE A PREDICATE REFERENCE -->
+            <turnsTrue>individualConstraintsByEmailCollected</turnsTrue>
+         </effect>
+         <effect name = "individualConstraintsByEmailFailed_Eff" description = "individualConstraintsByEmailFailed(sa, p, m)" satisfying = "false" probability = "0.05">
+			<!-- THIS SOULD BE A PREDICATE REFERENCE -->
+            <turnsTrue>individualConstraintsByEmailFailed</turnsTrue>
+         </effect>
+      </effectGroup>
+   </task>
+   <task name = "identifyMeetingTime" description = "Identify Meeting Time (sa,m)">
+      <parameters>
+		<parameter>
+			<param-type>schedulingAssistant</param-type>
+			<param-name>sa</param-name>
+		</parameter>
+		<parameter>
+			<param-type>meeting</param-type>
+			<param-name>m</param-name>
+		</parameter>
+	  </parameters>
+   
+      <effectGroup>
+         <effect name = "meetingTimeIdentified_Eff" description = "meetingTimeIdentified(sa,m)" satisfying = "true" probability = "0.99">
+			<!-- THIS SOULD BE A PREDICATE REFERENCE -->
+            <turnsTrue>meetingTimeIdentified</turnsTrue>
+         </effect>
+         <effect name = "meetingTimeIdentifiedFail_Eff" description = "meetingTimeIdentifiedFail(sa,m)" satisfying = "false" probability = "0.01">
+			<!-- THIS SOULD BE A PREDICATE REFERENCE -->
+            <turnsTrue>meetingTimeIdentifiedFail</turnsTrue>
+         </effect>
+      </effectGroup>
+      <pre>
+         <goalID>constraintsCollected</goalID>
+      </pre>
+   </task>
+   <task name = "collectIndividualConstraintsFromPollingTool" description = "Collect Individual Constraints from Polling Tool (sa,p,m)">
+      <parameters>
+		<parameter>
+			<param-type>schedulingAssistant</param-type>
+			<param-name>sa</param-name>
+		</parameter>
+		<parameter>
+			<param-type>pollingTool</param-type>
+			<param-name>t</param-name>
+		</parameter>
+		<parameter>
+			<param-type>meeting</param-type>
+			<param-name>m</param-name>
+		</parameter>
+	  </parameters>
+   
+      <effectGroup>
+         <effect name = "individualConstraintsByPollingToolCollected_Eff" description = "individualConstraintsByPollingToolCollected(sa, p, m)" satisfying = "true" probability = "0.95">
+			<!-- THIS SOULD BE A PREDICATE REFERENCE -->
+            <turnsTrue>individualConstraintsByPollingToolCollected</turnsTrue>
+         </effect>
+         <effect name = "individualConstraintsByPollingToolFailed_Eff" description = "individualConstraintsByPollingToolCollected(sa, p, m)" satisfying = "false" probability = "0.05">
+			<!-- THIS SOULD BE A PREDICATE REFERENCE -->
+            <turnsTrue>individualConstraintsByPollingToolCollected</turnsTrue>
+         </effect>
+      </effectGroup>
+   </task>
+</tasks>
+
+
+<!--
+*** Q U A L I T I E S ***
+-->
+<qualities>
+   <quality name = "overallQuality" description = "Overall Quality" root = "true">
+      <multiply><numConst>0.7</numConst><goalID>constraintsCollectedByEmailSaM</goalID></multiply>
+   </quality>
+</qualities>
+
+
+<!--
+*** CO N D I T I O N   B O X E S ***
+-->
+<condBoxes>
+</condBoxes>
+
+
+<!--
+*** I N I T I A L I Z AT I O N S ***
+-->
+<initializations>
+</initializations>
+
+
+<!--
+*** C R O S S   R U N S  ***
+-->
+<crossRuns>
+</crossRuns>
+
+
+<!--
+*** E X P O R T S ***
+-->
+<exportedSet>
+</exportedSet>
+
+
+<!--
+*** P R E D I C A T E S ***
+-->
+<predicates>
+   <predicate name = "individualConstraintsByPollingToolCollected" description = "">
+		<parameters>
+		<parameter>
+			<param-type>schedulingAssistant</param-type>
+			<param-name>sa</param-name>
+		</parameter>
+		<parameter>
+			<param-type>pollingTool</param-type>
+			<param-name>t</param-name>
+		</parameter>
+		<parameter>
+			<param-type>meeting</param-type>
+			<param-name>m</param-name>
+		</parameter>
+	  </parameters>
+	</predicate>
+	
+   <predicate name = "individualConstraintsByEmailCollected" description = "">
+		<parameters>
+		<parameter>
+			<param-type>schedulingAssistant</param-type>
+			<param-name>sa</param-name>
+		</parameter>
+		<parameter>
+			<param-type>potentialParticipant</param-type>
+			<param-name>p</param-name>
+		</parameter>
+		<parameter>
+			<param-type>meeting</param-type>
+			<param-name>m</param-name>
+		</parameter>
+	  </parameters>
+   
+   </predicate>
+   <predicate name = "meetingTimeIdentifiedFail" description = "">
+		<parameters>
+		<parameter>
+			<param-type>schedulingAssistant</param-type>
+			<param-name>sa</param-name>
+		</parameter>
+		<parameter>
+			<param-type>potentialParticipant</param-type>
+			<param-name>p</param-name>
+		</parameter>
+		<parameter>
+			<param-type>meeting</param-type>
+			<param-name>m</param-name>
+		</parameter>
+		</parameters>
+   </predicate>
+   <predicate name = "individualConstraintsByEmailFailed" description = "">
+		<parameters>
+		<parameter>
+			<param-type>schedulingAssistant</param-type>
+			<param-name>sa</param-name>
+		</parameter>
+		<parameter>
+			<param-type>potentialParticipant</param-type>
+			<param-name>p</param-name>
+		</parameter>
+		<parameter>
+			<param-type>meeting</param-type>
+			<param-name>m</param-name>
+		</parameter>
+		</parameters>
+	</predicate>
+   <predicate name = "meetingTimeIdentified" description = "">
+		<parameters>
+		<parameter>
+			<param-type>schedulingAssistant</param-type>
+			<param-name>sa</param-name>
+		</parameter>
+		<parameter>
+			<param-type>meeting</param-type>
+			<param-name>m</param-name>
+		</parameter>
+		</parameters>
+   </predicate>
+</predicates>
+
+
+<!--
+*** V A R I A B L E S ***
+-->
+<variables>
+</variables>
+
+
+<!--
+*** D E F I N I T I O N S ***
+-->
+<definitions>
+	<definition>
+		<!-- invitee(p,m) :- potentialParticipant(p,m) AND (collectIndividualConstraintsFromPollingTool(_,_,m) OR collectIndividualConstraintsByEmail(_,p,m))  -->
+		<definiendum name = "invitee">
+			<parameters>
+				<parameter>
+					<param-type>agent</param-type>
+					<param-name>p</param-name>
+				</parameter>
+				<parameter>
+					<param-type>meeting</param-type>
+					<param-name>m</param-name>
+				</parameter>
+			</parameters>
+		</definiendum>
+		<definiens>
+			<and>
+		    <predicate name = "potentialParticipant">
+				<parameters>
+					<parameter>
+					<param-type>agent</param-type>
+					<param-name>p</param-name>
+				</parameter>
+				<parameter>
+					<param-type>meeting</param-type>
+					<param-name>m</param-name>
+				</parameter>
+				</parameters>
+			</predicate>
+				<or>
+					<task name = "collectIndividualConstraintsFromPollingTool">
+					  <parameters>
+						<parameter>
+							<param-type>schedulingAssistant</param-type>
+							<param-name>sa</param-name>
+						</parameter>
+						<parameter>
+							<param-type>pollingTool</param-type>
+							<param-name>t</param-name>
+						</parameter>
+						<parameter>
+							<param-type>meeting</param-type>
+							<param-name>m</param-name>
+						</parameter>
+					  </parameters>
+					</task>
+					 
+					<task name = "collectIndividualConstraintsByEmail">
+					  <parameters>
+						<parameter>
+							<param-type>schedulingAssistant</param-type>
+							<param-name>sa</param-name>
+						</parameter>
+						<parameter>
+							<param-type>potentialParticipant</param-type>
+							<param-name>p</param-name>
+						</parameter>
+						<parameter>
+							<param-type>meeting</param-type>
+							<param-name>m</param-name>
+						</parameter>
+					  </parameters>
+					</task>
+				</or>
+			</and>				
+		</definiens>
+	</definition>
+</definitions>
+
+
+
+</actor>
+</actors>
+</iStarDT>

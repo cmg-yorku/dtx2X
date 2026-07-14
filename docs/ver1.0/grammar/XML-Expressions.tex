@@ -1,0 +1,124 @@
+
+
+
+\begin{figure}[p]
+\begin{tcolorbox}[title=iStar-DT-X Grammar,colbacktitle=orange!40!white,coltitle=black,fonttitle=\bfseries,adjusted title=iStarDT-X Grammar (1/3),halign title=flush center]
+
+\rmfamily
+\begin{footnotesize}
+\textbf{Primitives, Enums}
+\end{footnotesize}
+\ttfamily
+
+\vspace{-3mm}
+
+\begin{scriptsize}
+\begin{tabbing}
+[identifierr] \= ::= letter | digit | symbol \kill
+
+\textbf{[symbol]} \> ::= Any valid XML character except quotes and angle brackets \\
+\textbf{[letter]} \> ::= "A" | "B" | ... | "Z" | "a" | "b" | ... | "z" \\
+\textbf{[letter-small]} \> ::= "a" | "b" | ... | "z" \\
+\textbf{[digit]} \> ::= "0" | "1" | ... | "9" \\
+\textbf{[character]} \> ::= \textbf{[letter]} | \textbf{[digit]} | \textbf{[symbol]} \\
+\textbf{[alphanum]} \> ::= \textbf{[letter]} | \textbf{[digit]} | "\_" \\
+\textbf{[string]} \>  ::= \textbf{[character]}+ \\
+\textbf{[identifier]} \>  ::= \textbf{[letter-small]}\textbf{[alphanum]}* \\
+\textbf{[boolean]} \> ::= "true" | "false" \\
+\textbf{[decimal]} \> ::= \textbf{[digit]}+ [ "." \textbf{[digit]}+ ]\\
+\textbf{[integer]} \> ::= \textbf{[digit]}+ \\
+\red{{}[del-style]} \> \red{::= `sync' | `async'} \\
+\end{tabbing}
+\end{scriptsize}
+
+\vspace{-2mm}
+
+\rmfamily
+\begin{footnotesize}
+\textbf{Boolean Expressions}
+\end{footnotesize}
+\ttfamily
+\vspace{-3mm}
+
+\begin{scriptsize}
+\begin{tabbing}
+<boolean-expression> \= ::= \= <boolConst> | <boolAtom> | <previous-bool> | <numeric-comparison> | <boolean-operator> \kill
+
+
+
+\textbf{[boolean-expression]} \> ::= \> \textbf{[bool-const]} | \textbf{[atom]} | \textbf{[previous-bool]} | \\
+\textbf{[bool-const]} \> ::= "<boolConst>" \textbf{[boolean]} "</boolConst>" \\
+\textbf{[atom]} \> ::= \> [predicate-ref] | \sout{[condition-id] |} \\ 
+\> \> [goal-ref] | [task-ref] \sout{| [effect-id]}\\
+%\textbf{[b-const-id]} \> ::= "<b-const-id>" \textbf{[identifier] "</b-const-id>"} \\
+\sout{\textbf{[predicate-id]}} \> ::= \sout{"<predicateID>" \textbf{[identifier]} "</predicateID>"} \\
+\sout{\textbf{[condition-id]}} \> ::= \sout{"<conditionID>" \textbf{[identifier]} "</conditionID>"} \\
+\sout{\textbf{[effect-id]}} \> \sout{::= "<effectID>" \textbf{[identifier]} "</effectID>"} \\
+\sout{\textbf{[goal-id]}} \> \sout{::= "<goalID>" \textbf{[identifier]} "</goalID>"} \\
+\sout{\textbf{[task-id]}} \> \sout{::= "<taskID>" \textbf{[identifier]} "</taskID>"} \\
+\textbf{[previous-bool]} \> ::= "<previous>" \textbf{[atom] "</previous>"} \\
+\textbf{[boolean-operation]} \> ::= \> \textbf{[and]} | \textbf{[or]} | \textbf{[not]}\\
+\textbf{[and]} \> ::= \> "<and>" \textbf{[boolean-expression] [boolean-expression]+} "</and>"\\
+\textbf{[or]}  \> ::=  \> "<or>" \textbf{[boolean-expression] [boolean-expression]+} "</or>"\\
+\textbf{[not]} \> ::= \> "<not>" \textbf{[boolean-expression]} "</not>"\\
+\textbf{[comparison-op]} \> ::= \> "gt" | "gte" | "lt" | "lte" | "eq" | "neq"\\
+\textbf{[numeric-comparison]} \> ::= \> "<" \textbf{[comparison-op]} ">" \\ 
+     \> \> "<left>" \textbf{[numeric-expression]} "</left>"  \\ 
+     \> \> "<right>" \textbf{[numeric-expression]} "</right>" \\ 
+     \> \> "</" \textbf{[comparison-op]} ">"
+\end{tabbing}
+\end{scriptsize}
+
+\vspace{-2mm}
+
+\rmfamily
+\begin{footnotesize}
+\textbf{Numeric Expressions}
+\end{footnotesize}
+\ttfamily
+
+\vspace{-3mm}
+
+\begin{scriptsize}
+\begin{tabbing}
+<arithmetic-operator> \= ::= \= <add> | <subtract> | <multiply> | <divide> | <negate> \kill
+\textbf{[numeric-expression]} \> ::= \> \textbf{[num-const]} | \textbf{[num-atom]} | \textbf{[num-previous]} | \\\>\> \textbf{[arithmetic-operation]}\\
+\textbf{[num-const]} \> ::= "<numConst>" \textbf{[decimal]} "</numConst>" \\
+\textbf{[num-atom]} \> ::= \textbf{[atom]}  | \textbf{[variable-id]} | \textbf{[qual-id]} \\
+\textbf{[variable-id]} \> ::= "<variableID>" \textbf{[identifier]} "</variableID>" \\
+\textbf{[qual-id]} \> ::= "<qualID>" \textbf{[identifier]} "</qualID>" \\
+\textbf{[num-previous]} \> ::= "<previous>" \textbf{[num-atom]} "</previous>"\\
+\textbf{[arithmetic-operator]} \> ::= [add] | [subtract] | [multiply] | [divide] \\ % | [negate] \\
+\textbf{[add]} \> ::= "<add>" \textbf{[numeric-expression] [numeric-expression]}+ "</add>" \\
+\textbf{[multiply]} \> ::= "<multiply>" \textbf{[numeric-expression] [numeric-expression]}+\\\>\> "</multiply>"\\
+\textbf{[subtract]} \> ::= \> "<subtract>" "<left>" \textbf{[numeric-expression]} "</left>" \\
+\>\> "<right>" \textbf{[numeric-expression]} "</right>" "</subtract>"\\
+\textbf{[divide]} \> ::= "<divide>" "<left>" \textbf{[numeric-expression]} "</left>" \\ 
+\>\> "<right>" \textbf{[numeric-expression]} "</right>" "</divide>"
+%\textbf{[negate]} \> ::= "<negate>" \textbf{[numeric-expression]} "</negate>"
+\end{tabbing}
+\end{scriptsize}
+
+\rmfamily
+\begin{footnotesize}
+\textbf{\red{Parameters}}
+\end{footnotesize}
+\ttfamily
+
+\begin{scriptsize}
+\begin{tabbing}
+\red{[+++++++++++]}\= \red{::= "<parameters>" \textbf{[parameter]} "</parameters>"}\kill
+\red{[parameters]}\> \red{::= "<parameters>" \textbf{[parameter]} "</parameters>"}\\
+\red{[parameter]} \> \red{::= "<parameter>" [param-type] [param-name] "</parameter>"}\\ 
+\red{[param-type]} \> \red{::= "<param-type>" [identifier] "</param-type>"}\\ 
+\red{[param-name]} \> \red{::= "<param-name>" [identifier] "</param-name>"}\\ 
+\end{tabbing}
+\end{scriptsize}
+
+\end{tcolorbox}
+\caption{BNF specification of iStarDT-X: primitives and expressions.}\label{fig:iStarDT-X-Primitives}
+\end{figure}
+
+
+
+

@@ -1,0 +1,94 @@
+\begin{figure}[hp!]
+\begin{tcolorbox}[title=iStar-DT-X Grammar,colbacktitle=orange!40!white,coltitle=black,fonttitle=\bfseries,adjusted title=iStarDT-X Grammar (3/3),halign title=flush center]
+
+\rmfamily
+\begin{footnotesize}
+\textbf{Qualities}
+\end{footnotesize}
+\ttfamily
+\vspace{-3mm}
+
+\begin{scriptsize}
+\begin{tabbing}
+\textbf{[qualities]} \= ::= \= "<qualities>" \textbf{[quality]}+ "</qualities>"\\
+\textbf{[quality]} \> ::= "<quality name=`" \textbf{[identifier]} "'" [" description=`" \textbf{[string]} "'"] \\\>\> [" root=`" \textbf{[boolean]} "'"] ">" \\\>\> \textbf{[numeric-expression]} "</quality>"\\
+\end{tabbing}
+
+
+\vspace{-2mm}
+\rmfamily
+\begin{footnotesize}
+\textbf{Predicates and Variables}
+\end{footnotesize}
+\ttfamily
+\vspace{-3mm}
+
+\begin{scriptsize}
+\begin{tabbing}
+[individualzzz] \= ::= \= [" init=`" <boolean> "'"] [" exported=`" <boolean> "'"] [" description=\"" <string> "\""] \sout{[" primitive=`" <boolean> "'"]} \kill
+
+\textbf{[predicates]} \> ::= "<predicates>" \textbf{[predicate]}+ "</predicates>" \\
+\textbf{[predicate]} \> ::= "<predicate name = \red{`" [identifier] "'} description =`" [string] "'>" \\ 
+\>\> \red{[ [parameters] ] "</predicate>" \textit{\% see above} }\\
+\red{[predicate-ref]} \> \red{::= "<predicate name = `" [identifier] "'>"} \\ 
+\>\> \red{[ [parameters] ] "</predicate>" \textit{\% see above} }\\
+\textbf{[variables]} \> ::= "<variables>" \textbf{[variable]}+ "</variables>" \\
+\textbf{[variable]} \> ::= "<variable description =`" [string] "'>" \\ \>\> \textbf{[identifier]} "</variable>"
+\end{tabbing}
+\end{scriptsize}
+
+
+\vspace{-2mm}
+\rmfamily
+\begin{footnotesize}
+\textbf{Condition Boxes}
+\end{footnotesize}
+\ttfamily
+\vspace{-3mm}
+
+\begin{scriptsize}
+\begin{tabbing}
+\textbf{[condBoxes]} \= ::= \= "<condBoxes>" \textbf{[condBox]}+ "</condBoxes>"\\
+\red{\textbf{[condBox]}} \> ::= \red{"<condBox name=`" \textbf{[identifier]} "'" [" description=`" <string> "'"] ">"} \\ 
+\> \> \red{[predicate-ref]"</condBox>"}\\
+\end{tabbing}
+\end{scriptsize}
+
+\vspace{-2mm}
+
+\rmfamily
+\begin{footnotesize}
+\textbf{Cross-runs, Exported Sets, Initializations, Definitinos}
+\end{footnotesize}
+\ttfamily
+\vspace{-3mm}
+\begin{scriptsize}
+\begin{tabbing}
+\textbf{[initializations]} \= ::= \= [" init=`" <boolean> "'"] [" exported=`" <boolean> "'"] [" description=\"" <string> "\""] \sout{[" primitive=`" <boolean> "'"]} \kill
+\textbf{[cross-runs]} \> ::= "<crossRuns>" \textbf{[cross-run]}+ "</crossRuns>" \\
+\textbf{[cross-run]} \> ::= "<crossRun>" \textbf{[predicate-id]} | \textbf{[variable-id]} | \textbf{[qual-id]}\\\>\> "</crossRun>" \\
+\textbf{[exported-set]} \> ::= "<exportedSet>" \textbf{[export]}+ "</exportedSet>" \\
+\textbf{[export]} \> ::= "<export continuous=" [boolean] [ "minVal=" [decimal]] \\\>\> [" maxVal=" [decimal] ] ">"  \textbf{[exp-id]} "</export>" \\
+\textbf{[exp-id]} \> ::= [goal-id] | [task-id] | [predicate-id] | [variable-id] | [qual-id] \\
+\textbf{[initializations]}\> ::= "<initializations> " \textbf{[initialization]} "</initialization>" \\
+
+\textbf{[initialization]} \> ::= [b-init] | [d-init] \\
+\textbf{[b-init]} \> ::= "<initialization element=" \textbf{[predicate-id]} "> " \\\>\> \textbf{[boolean]} "</initialization>" \\
+%\textbf{[b-init-id]} \> ::= [b-const-id] | [predicate-id]\\
+\textbf{[d-init]} \> ::= "<initialization element=" \textbf{[cont-init-id]} "> " \\\>\> \textbf{[decimal]} "</initialization>" \\
+\textbf{[cont-init-id]} \> ::= [variable-id] | [qual-id] \\
+\red{\textbf{[definitions]}}\> \red{::= "<definitions>" \textbf{[definition]} "</definitions>"} \\
+\red{\textbf{[definition]}}\> \red{::= "<definition>" \textbf{[definiendum] [definiens]} "</definition>"} \\
+\red{[definiendum]} \> \red{::= "<definiendum name = `" [identifier] "'>"} \\ 
+\>\> \red{[ [parameters] ] "</definiendum>"} \\
+\red{\textbf{[defiens]}}\> \red{::= "<definiens>" [boolean-expression] "</definiens>"} \\
+\end{tabbing}
+\end{scriptsize}
+
+\rmfamily
+
+
+\end{scriptsize}
+\end{tcolorbox}
+\caption{BNF specification of iStarDT-X: Qualities, Predicates, Variables, Condition Boxes, Cross-run, Exported and Initialization sets.}\label{fig:iStarDT-X-Qualities}
+\end{figure}
