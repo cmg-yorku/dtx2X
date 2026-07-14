@@ -1,0 +1,7 @@
+ca.yorku.cmg.istardt.translators.dtx2dtg
+ca.yorku.cmg.istardt.xmlparser.objects
+ca.yorku.cmg.istardt.xmlparser.xml
+ca.yorku.cmg.istardt.xmlparser.xml.deserializers
+ca.yorku.cmg.istardt.xmlparser.xml.formula
+ca.yorku.cmg.istardt.xmlparser.xml.processing
+ca.yorku.cmg.istardt.xmlparser.xml.utils

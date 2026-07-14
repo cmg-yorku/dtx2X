@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ModelDeserializer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">dtx2X</a> &gt; <a href="index.source.html" class="el_package">ca.yorku.cmg.istardt.xmlparser.xml.deserializers</a> &gt; <span class="el_source">ModelDeserializer.java</span></div><h1>ModelDeserializer.java</h1><pre class="source lang-java linenums">package ca.yorku.cmg.istardt.xmlparser.xml.deserializers;
+
+import ca.yorku.cmg.istardt.xmlparser.objects.Actor;
+import ca.yorku.cmg.istardt.xmlparser.objects.Header;
+import ca.yorku.cmg.istardt.xmlparser.objects.Model;
+import ca.yorku.cmg.istardt.xmlparser.objects.Options;
+import ca.yorku.cmg.istardt.xmlparser.xml.utils.CustomLogger;
+import ca.yorku.cmg.istardt.xmlparser.xml.utils.DeserializerUtils;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Logger;
+
+public class ModelDeserializer extends StdDeserializer&lt;Model&gt; {
+<span class="fc" id="L20">    private static final CustomLogger LOGGER = CustomLogger.getInstance();</span>
+
+    public ModelDeserializer() {
+<span class="fc" id="L23">        super(Model.class);</span>
+<span class="fc" id="L24">    }</span>
+
+    @Override
+    public Model deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+<span class="fc" id="L28">        JsonNode node = p.getCodec().readTree(p);</span>
+<span class="fc" id="L29">        Model model = new Model();</span>
+
+        try {
+<span class="pc bpc" id="L32" title="1 of 2 branches missed.">            if (node.has(&quot;header&quot;)) {</span>
+<span class="fc" id="L33">                Header header = deserializeHeader(node.get(&quot;header&quot;), p, ctxt);</span>
+<span class="fc" id="L34">                model.setHeader(header);</span>
+<span class="fc" id="L35">            } else {</span>
+<span class="nc" id="L36">                model.setHeader(new Header());</span>
+<span class="nc" id="L37">                LOGGER.info(getClass(),&quot;No header found, using default&quot;);</span>
+            }
+
+<span class="pc bpc" id="L40" title="1 of 2 branches missed.">            if (node.has(&quot;options&quot;)) {</span>
+<span class="fc" id="L41">                Options options = deserializeOptions(node.get(&quot;options&quot;), p, ctxt);</span>
+<span class="fc" id="L42">                model.setOptions(options);</span>
+<span class="fc" id="L43">            } else {</span>
+<span class="nc" id="L44">                model.setOptions(new Options());</span>
+<span class="nc" id="L45">                LOGGER.info(getClass(),&quot;No options found, using default&quot;);</span>
+            }
+
+<span class="fc" id="L48">            List&lt;Actor&gt; actors = new ArrayList&lt;&gt;();</span>
+<span class="pc bpc" id="L49" title="1 of 2 branches missed.">            if (node.has(&quot;actors&quot;)) {</span>
+<span class="fc" id="L50">                JsonNode actorsNode = node.get(&quot;actors&quot;);</span>
+<span class="pc bpc" id="L51" title="1 of 2 branches missed.">                if (actorsNode.has(&quot;actor&quot;)) {</span>
+<span class="fc" id="L52">                    JsonNode actorNodes = actorsNode.get(&quot;actor&quot;);</span>
+<span class="fc" id="L53">                    actors = DeserializerUtils.deserializeList(actorNodes, p, ctxt, Actor.class);</span>
+<span class="fc" id="L54">                    LOGGER.info(getClass(),&quot;Deserialized &quot; + actors.size() + &quot; actors&quot;);</span>
+<span class="fc" id="L55">                } else {</span>
+<span class="nc" id="L56">                    LOGGER.warning(getClass(),&quot;No actors found within actors tag&quot;);</span>
+                }
+<span class="fc" id="L58">            } else {</span>
+<span class="nc" id="L59">                LOGGER.warning(getClass(),&quot;No actors tag found&quot;);</span>
+            }
+<span class="fc" id="L61">            model.setActors(actors);</span>
+<span class="nc" id="L62">        } catch (IOException e) {</span>
+<span class="nc" id="L63">            LOGGER.error(getClass(),  &quot;Error deserializing model&quot;, e);</span>
+<span class="fc" id="L64">        }</span>
+<span class="fc" id="L65">        return model;</span>
+    }
+    private Header deserializeHeader(JsonNode headerNode, JsonParser p, DeserializationContext ctxt) throws IOException {
+<span class="fc" id="L68">        Header header = new Header();</span>
+<span class="fc" id="L69">        header.setTitle(DeserializerUtils.getStringAttribute(headerNode, &quot;title&quot;, &quot;&quot;));</span>
+<span class="fc" id="L70">        header.setAuthor(DeserializerUtils.getStringAttribute(headerNode, &quot;author&quot;, &quot;&quot;));</span>
+<span class="fc" id="L71">        header.setSource(DeserializerUtils.getStringAttribute(headerNode, &quot;source&quot;, &quot;&quot;));</span>
+<span class="fc" id="L72">        header.setLastUpdated(DeserializerUtils.getStringAttribute(headerNode, &quot;lastUpdated&quot;, &quot;&quot;));</span>
+
+        // Get mixed content text
+<span class="fc bfc" id="L75" title="All 2 branches covered.">        if (headerNode.has(&quot;&quot;)) {</span>
+<span class="fc" id="L76">            header.setNotes(headerNode.get(&quot;&quot;).asText().trim());</span>
+        } else {
+<span class="fc" id="L78">            header.setNotes(&quot;&quot;);</span>
+        }
+
+<span class="fc" id="L81">        LOGGER.info(getClass(),&quot;Deserialized Header&quot;);</span>
+<span class="fc" id="L82">        return header;</span>
+    }
+
+    private Options deserializeOptions(JsonNode optionsNode, JsonParser p, DeserializationContext ctxt) throws IOException {
+<span class="fc" id="L86">        Options options = new Options();</span>
+<span class="fc" id="L87">        options.setContinuous(DeserializerUtils.getBooleanAttribute(optionsNode, &quot;continuous&quot;, false));</span>
+<span class="fc" id="L88">        options.setInfActionPenalty(DeserializerUtils.getFloatAttribute(optionsNode, &quot;infeasibleActionPenalty&quot;, 0.0f));</span>
+
+<span class="fc" id="L90">        LOGGER.info(getClass(),&quot;Deserialized Options&quot;);</span>
+<span class="fc" id="L91">        return options;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

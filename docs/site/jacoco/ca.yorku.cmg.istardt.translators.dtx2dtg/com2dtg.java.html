@@ -1,0 +1,622 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>com2dtg.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">dtx2X</a> &gt; <a href="index.source.html" class="el_package">ca.yorku.cmg.istardt.translators.dtx2dtg</a> &gt; <span class="el_source">com2dtg.java</span></div><h1>com2dtg.java</h1><pre class="source lang-java linenums">package ca.yorku.cmg.istardt.translators.dtx2dtg;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+
+import ca.yorku.cmg.istardt.xmlparser.objects.*;
+
+public class com2dtg {
+	
+	private Model model;
+	private Formatter formatter;
+	private FormulaParser parser;
+	
+	private String outputFile;
+	
+<span class="fc" id="L22">	private String modelName = &quot;Spec&quot;;</span>
+<span class="fc" id="L23">	private String header = &quot;&quot;; </span>
+<span class="fc" id="L24">	private String numRuns = &quot;&quot;;</span>
+<span class="fc" id="L25">	private String problemType = &quot;&quot;;</span>
+	
+<span class="fc" id="L27">	private String crossRunSet = &quot;transStateStructure([&quot;;</span>
+
+<span class="fc" id="L29">	private String initList = &quot;init([&quot;;</span>
+	
+<span class="fc" id="L31">	private String agentActionList = &quot;agentActionList([&quot;;</span>
+<span class="fc" id="L32">	private String agentActions = &quot;&quot;;</span>
+<span class="fc" id="L33">	private String stochasticActionList = &quot;stochasticActionList([&quot;;</span>
+<span class="fc" id="L34">	private String stochasticActions = &quot;&quot;;</span>
+<span class="fc" id="L35">	private String nonDetActions = &quot;&quot;;</span>
+<span class="fc" id="L36">	private String fluentList = &quot;fluentList([&quot;;</span>
+
+<span class="fc" id="L38">	private String discreteExportedSet = &quot;discreteExportedSet([&quot;;</span>
+<span class="fc" id="L39">	private String continuousExportedSet = &quot;continuousExportedSet([&quot;;</span>
+	
+<span class="fc" id="L41">	private String procedures = &quot;&quot;;</span>
+<span class="fc" id="L42">	private String probabilities = &quot;&quot;;</span>
+<span class="fc" id="L43">	private String successorStateAxioms = &quot;&quot;;</span>
+<span class="fc" id="L44">	private String preconditionAxioms = &quot;&quot;;</span>
+<span class="fc" id="L45">	private String preconditionAxiomsTasks = &quot;&quot;;</span>
+//	private String successorStateAxiomsPre = &quot;&quot;;
+<span class="fc" id="L47">	private String rewardFormulae = &quot;&quot;;</span>
+<span class="fc" id="L48">	private String satisfactionFormulae = &quot;&quot;;</span>
+<span class="fc" id="L49">	private String satisfactionFormulae_Effects = &quot;&quot;;</span>
+<span class="fc" id="L50">	private String rootSat = &quot;&quot;;</span>
+//	private String satisfactionFormulaePre = &quot;&quot;;
+<span class="fc" id="L52">	private String attemptFormulae = &quot;&quot;;</span>
+<span class="fc" id="L53">	private String senseConditions = &quot;&quot;;</span>
+<span class="fc" id="L54">	private String restoreSitArg = &quot;&quot;;	</span>
+
+<span class="fc" id="L56">	public com2dtg(Model m, String path) {</span>
+<span class="fc" id="L57">		this.model = m;</span>
+<span class="fc" id="L58">		this.formatter = new Formatter();</span>
+<span class="fc" id="L59">		this.parser = new FormulaParser();</span>
+<span class="fc" id="L60">		outputFile = path;</span>
+<span class="fc" id="L61">	}</span>
+
+	public Actor getActor() {
+<span class="fc" id="L64">		return model.getActors().get(0);</span>
+	}
+	
+	
+	public Boolean isContinuous(ExportedSet exp) {
+<span class="nc" id="L69">		Boolean contProblem = false;</span>
+<span class="nc bnc" id="L70" title="All 2 branches missed.">		if (exp != null) { //if exp is null default is discrete</span>
+<span class="nc bnc" id="L71" title="All 2 branches missed.">			for (Export rt: exp.getExports()) {</span>
+<span class="nc" id="L72">				String descr = rt.getElement().getName(); //CAUTION: maybe this is getRef</span>
+<span class="nc bnc" id="L73" title="All 4 branches missed.">				if ((rt.getElement() instanceof Quality) || (rt.getElement() instanceof Variable))  {</span>
+<span class="nc" id="L74">					contProblem = true;</span>
+				}
+<span class="nc" id="L76">			}</span>
+		}
+<span class="nc" id="L78">		return(contProblem);</span>
+	}
+	
+	public String getDiscreteExportedSet(ExportedSet exp) {
+<span class="fc" id="L82">		String discreteExport = &quot;%\n% D I S C R E T E   E X P O R T S\n%\n&quot;;</span>
+<span class="fc" id="L83">		discreteExport += &quot;discreteExportedSet([&quot;;</span>
+<span class="fc" id="L84">		Boolean empty = true;</span>
+<span class="pc bpc" id="L85" title="1 of 2 branches missed.">		if (exp != null) {</span>
+<span class="fc bfc" id="L86" title="All 2 branches covered.">			for (Export rt: exp.getExports()) {</span>
+<span class="fc" id="L87">				String descr = rt.getElement().getName(); //CAUTION: maybe this is getRef</span>
+<span class="fc bfc" id="L88" title="All 4 branches covered.">				if ((rt.getElement() instanceof Goal) || (rt.getElement() instanceof Task))  {</span>
+<span class="fc" id="L89">					descr += &quot;_Sat&quot;;</span>
+<span class="fc" id="L90">					discreteExport += descr + &quot;,&quot;;</span>
+<span class="fc" id="L91">					empty = false;</span>
+<span class="fc bfc" id="L92" title="All 2 branches covered.">				} else if (rt.getElement() instanceof Predicate) {</span>
+<span class="fc" id="L93">					descr += &quot;_fl&quot;;</span>
+<span class="fc" id="L94">					discreteExport += descr + &quot;,&quot;;</span>
+<span class="fc" id="L95">					empty = false;</span>
+				}
+<span class="fc" id="L97">			}</span>
+		}
+		
+<span class="fc bfc" id="L100" title="All 2 branches covered.">		if (!empty) {</span>
+<span class="fc" id="L101">			discreteExport = discreteExport.substring(0, discreteExport.length() - 1) + &quot;]).\n&quot;;</span>
+		} else {
+<span class="fc" id="L103">			discreteExport += &quot;]).\n&quot;;</span>
+			//discreteExport = &quot;discreteExportedSet(X) :- fluentList(X),!.\n&quot;;
+		}
+		
+<span class="fc" id="L107">		return(discreteExport);</span>
+	}
+	
+	public String getContinuousExportedSet(ExportedSet exp) {
+		
+<span class="fc" id="L112">		String continuousExport = &quot;%\n% C O N T I N U O U S   E X P O R T S\n%\n&quot;;</span>
+<span class="fc" id="L113">		continuousExport += &quot;continuousExportedSet([&quot;;</span>
+<span class="fc" id="L114">		Boolean empty = true;</span>
+		
+<span class="pc bpc" id="L116" title="1 of 2 branches missed.">		if (exp != null) {</span>
+<span class="fc bfc" id="L117" title="All 2 branches covered.">			for (Export rt: exp.getExports()) {</span>
+<span class="fc" id="L118">				String descr = rt.getElement().getName(); //CAUTION: maybe this is getRef</span>
+<span class="pc bpc" id="L119" title="1 of 4 branches missed.">				if ((rt.getElement() instanceof Quality) || (rt.getElement() instanceof Variable))  {</span>
+<span class="fc" id="L120">					descr += &quot;(_),&quot; + rt.getMinVal() + &quot;,&quot; + rt.getMaxVal();</span>
+<span class="fc" id="L121">					continuousExport += &quot;[&quot; + descr + &quot;], &quot;;</span>
+<span class="fc" id="L122">					empty = false;</span>
+				}
+<span class="fc" id="L124">			}</span>
+		}
+		
+<span class="fc bfc" id="L127" title="All 2 branches covered.">		if (!empty) {</span>
+<span class="fc" id="L128">			continuousExport = continuousExport.substring(0, continuousExport.length() - 2) + &quot;]).\n&quot;;</span>
+		} else {
+<span class="fc" id="L130">			continuousExport += &quot;]).\n&quot;;</span>
+		}
+<span class="fc" id="L132">		return(continuousExport);</span>
+	}
+
+	public String getCrossRunState(CrossRunSet crs) {
+<span class="fc" id="L136">		String crossState = &quot;%\n% C R O S S   S T A T E \n%\n&quot;;</span>
+<span class="fc" id="L137">		crossState += &quot;transStateStructure([&quot;;</span>
+<span class="fc bfc" id="L138" title="All 2 branches covered.">		for (Element cr: crs.getElements()) {</span>
+<span class="fc" id="L139">			String descr = cr.getName(); //CAUTION: maybe this is getRef</span>
+<span class="pc bpc" id="L140" title="1 of 2 branches missed.">			if ((cr instanceof Predicate))  {</span>
+<span class="nc" id="L141">				crossState += descr + &quot;_fl,&quot;;</span>
+<span class="fc bfc" id="L142" title="All 2 branches covered.">			} else if ((cr instanceof Condition))  {</span>
+<span class="fc" id="L143">					crossState += descr + &quot;_fl,&quot;;</span>
+<span class="pc bpc" id="L144" title="2 of 4 branches missed.">			} else if ((cr instanceof Variable) || (cr instanceof Quality)) {</span>
+<span class="fc" id="L145">				crossState += descr + &quot;(_),&quot;;</span>
+			} else {
+<span class="nc" id="L147">				System.err.println(&quot;ERROR: cross run set can contain only predicates, conditions, variables, or qualities. &quot;);</span>
+<span class="nc" id="L148">				System.err.println(descr + &quot; is a &quot; + cr.getClass().getSimpleName() + &quot;?&quot;);			}</span>
+<span class="fc" id="L149">		}</span>
+<span class="fc" id="L150">		crossState  = crossState .substring(0, crossState .length() - 1) + &quot;]).\n&quot;;</span>
+	
+<span class="fc" id="L152">		return(crossState);</span>
+	}
+	
+	public String getInitializations (InitializationSet init) {
+<span class="fc" id="L156">		String initLine = &quot;init([&quot;;</span>
+		
+<span class="pc bpc" id="L158" title="1 of 4 branches missed.">		if ((init != null) &amp;&amp; !init.getInitializations().isEmpty()) {</span>
+<span class="fc bfc" id="L159" title="All 2 branches covered.">			for (Initialization it: init.getInitializations()) {</span>
+<span class="fc" id="L160">				String descr = it.getRef();</span>
+<span class="pc bpc" id="L161" title="1 of 2 branches missed.">				if ((it.getElement() instanceof Predicate))  {</span>
+<span class="nc" id="L162">					initLine += descr + &quot;_fl,&quot;;</span>
+<span class="pc bpc" id="L163" title="1 of 2 branches missed.">				} else if ((it.getElement() instanceof Condition))  {</span>
+<span class="nc" id="L164">					initLine += descr + &quot;_fl,&quot;;</span>
+<span class="pc bpc" id="L165" title="1 of 2 branches missed.">				} else if (it.getElement() instanceof Variable) {</span>
+<span class="nc" id="L166">					initLine += descr + &quot;_fl(&quot; + it.getValue() +  &quot;),&quot;;</span>
+<span class="pc bpc" id="L167" title="1 of 2 branches missed.">				} else if (it.getElement() instanceof Quality) {</span>
+<span class="fc" id="L168">					initLine += descr + &quot;(&quot; + it.getValue() +  &quot;),&quot;;</span>
+				} else {
+<span class="nc" id="L170">					System.err.println(&quot;ERROR: initializations can contain only predicates, conditions, variables, or qualities. &quot;);</span>
+<span class="nc" id="L171">					System.err.println(descr + &quot; is a &quot; + it.getElement().getClass().getSimpleName() + &quot;?&quot;);</span>
+				}
+<span class="fc" id="L173">			}</span>
+<span class="fc" id="L174">			initLine = initLine.substring(0, initLine.length() - 1) + &quot;]).\n&quot;;		</span>
+		} else {
+<span class="fc" id="L176">			initLine +=  &quot;]).\n&quot;;</span>
+		}
+<span class="fc" id="L178">		return (initLine);</span>
+	}
+	
+	
+	private ArrayList&lt;DecompositionElement&gt; getORSiblings(DecompositionElement e, ArrayList&lt;DecompositionElement&gt; l) {
+<span class="fc bfc" id="L183" title="All 2 branches covered.">		if (e.isRoot()) {</span>
+<span class="fc" id="L184">			return(l);</span>
+		}
+		
+<span class="fc" id="L187">		DecompositionElement parent = e.getParent();</span>
+
+<span class="fc bfc" id="L189" title="All 2 branches covered.">		if (parent.getDecompType() == DecompType.OR) {</span>
+<span class="fc bfc" id="L190" title="All 2 branches covered.">			for (DecompositionElement ch : e.getSiblings()) {</span>
+<span class="fc" id="L191">				l.add(ch);</span>
+<span class="fc" id="L192">			}</span>
+		}
+<span class="fc" id="L194">		return getORSiblings(parent,l);</span>
+	}
+	
+	
+	
+	private ArrayList&lt;String&gt; getPreFormulae(DecompositionElement e, ArrayList&lt;String&gt; l) {
+<span class="fc bfc" id="L200" title="All 2 branches covered.">		if (e.isRoot()) {</span>
+<span class="fc" id="L201">			return(l);</span>
+		}
+		
+<span class="fc" id="L204">		DecompositionElement parent = e.getParent();</span>
+
+<span class="fc bfc" id="L206" title="All 2 branches covered.">		if (parent.getPreFormula() != null) {</span>
+<span class="fc" id="L207">			String prec = parser.parseConditionExpression(parent.getPreFormula());</span>
+<span class="fc" id="L208">			l.add(prec);</span>
+		}
+<span class="fc" id="L210">		return getPreFormulae(parent,l);</span>
+	}
+	
+	
+	
+	
+	public void translate(boolean printDate) {
+
+
+<span class="fc" id="L219">		Actor a = getActor();</span>
+		
+		/* 
+		 *  Preliminary
+		 */
+
+<span class="fc" id="L225">		header = getHeader();</span>
+		
+		/* 
+		 *  Preliminary
+		 */
+
+		// Number of Runs
+<span class="fc" id="L232">		numRuns = &quot;getNumRuns(&quot; + a.getGoalRoot().getRuns() + &quot;).&quot;;</span>
+		// Problem type
+		//problemType = isContinuous(a.getExportedSet()) ? &quot;getObsType(continuous).\n&quot; : &quot;getObsType(discrete).\n&quot;;  
+<span class="fc" id="L235">		problemType = &quot;getObsType(continuous).\n&quot;;</span>
+		
+		// TODO
+		// Configure Reward style
+		// Configure infeasible penalty
+		
+		// DISCRETE EXPORTED SET
+<span class="fc" id="L242">		this.discreteExportedSet = getDiscreteExportedSet(a.getExportedSet());</span>
+		
+		// CONTINUOUS EXPORTED SET
+<span class="fc" id="L245">		this.continuousExportedSet = getContinuousExportedSet(a.getExportedSet());</span>
+
+		// CROSS RUN SET
+<span class="fc" id="L248">		this.crossRunSet = getCrossRunState(a.getCrossRunSet());</span>
+
+		// INITIALIZATIONS
+<span class="fc" id="L251">		this.initList = getInitializations(a.getInitializationSet());</span>
+
+		
+		/* 
+		 *  Process Tasks
+		 */
+		
+<span class="fc bfc" id="L258" title="All 2 branches covered.">		for (Task t:a.getTasks()) {</span>
+<span class="fc" id="L259">			String taskID = formatter.toCamelCase(t.getName());</span>
+<span class="fc" id="L260">			String taskPrecond = &quot;&quot;;</span>
+			
+<span class="fc" id="L262">			agentActionList += taskID + &quot;,&quot;;</span>
+<span class="fc" id="L263">			agentActions += &quot;agentAction(&quot; + taskID + &quot;).\n&quot;;</span>
+<span class="fc" id="L264">			nonDetActions += &quot;nondetActions(&quot; + taskID + &quot;,_,[&quot;;</span>
+			
+<span class="fc" id="L266">			String localSatFormula = &quot;&quot;;</span>
+<span class="fc" id="L267">			String localPreFormula = &quot;&quot;;</span>
+<span class="fc" id="L268">			String localAttFormula = &quot;&quot;;</span>
+			
+<span class="fc bfc" id="L270" title="All 2 branches covered.">			for (Effect e: t.getEffects()) {</span>
+<span class="fc" id="L271">				String effectID = e.getName(); //formatter.toCamelCase(e.getName());</span>
+<span class="fc" id="L272">				ArrayList&lt;String&gt; localPreconditions = new ArrayList&lt;String&gt;();</span>
+				
+<span class="fc" id="L274">				taskPrecond += &quot;poss(&quot; + effectID + &quot;,S);&quot;;</span>
+				
+<span class="fc" id="L276">				stochasticActionList += effectID + &quot;,&quot;;</span>
+<span class="fc" id="L277">				stochasticActions += &quot;stochasticAction(&quot; + effectID + &quot;).\n&quot;;</span>
+<span class="fc" id="L278">				nonDetActions += effectID + &quot;,&quot;;</span>
+<span class="fc" id="L279">				probabilities += &quot;prob(&quot; + effectID + &quot;,&quot; + e.getProbability() + &quot;,_).\n&quot;;</span>
+				
+<span class="fc" id="L281">				String effectSatFormula = effectID + &quot;_Sat(S) :- &quot;;</span>
+
+<span class="fc bfc" id="L283" title="All 2 branches covered.">				for(String pred : e.getTurnsTrue()) {</span>
+<span class="fc" id="L284">					fluentList += formatter.toFluent(pred) + &quot;,&quot;;</span>
+<span class="fc" id="L285">					successorStateAxioms += formatter.toFluent(pred) + &quot;(do(A,S)) :- &quot; + </span>
+<span class="fc" id="L286">							formatter.toFluent(pred) + &quot;(S); A=&quot; + effectID + &quot;.\n&quot;;</span>
+<span class="fc" id="L287">					senseConditions += &quot;senseCondition(&quot; + effectID + &quot;,&quot; + effectID + &quot;_Occured).\n&quot;;</span>
+<span class="fc" id="L288">					restoreSitArg += &quot;restoreSitArg(&quot; + formatter.toFluent(pred) + &quot;,S,&quot; + formatter.toFluent(pred) + &quot;(S)).\n&quot;;</span>
+					
+<span class="fc" id="L290">					effectSatFormula += formatter.toFluent(pred) + &quot;(S),&quot;;</span>
+<span class="fc" id="L291">					localAttFormula += formatter.toFluent(pred) + &quot;(S);&quot;;</span>
+					
+<span class="fc bfc" id="L293" title="All 2 branches covered.">					if (e.isSatisfying()) {</span>
+<span class="fc" id="L294">						localSatFormula += formatter.toFluent(pred) + &quot;(S);&quot;;</span>
+<span class="fc" id="L295">						localPreFormula += formatter.toPreFluent(pred) + &quot;(S);&quot;;</span>
+					}
+					
+					
+<span class="fc" id="L299">				} //Next predicate</span>
+				
+				// TODO: Process getTurnsFalse 
+				
+<span class="fc" id="L303">				satisfactionFormulae_Effects += formatter.trimTrailingCharacter(effectSatFormula) + &quot;.\n&quot;;  </span>
+				
+				
+				//
+				// EFECT PRECONDITIONS
+				//
+				
+				//Parent task
+<span class="fc" id="L311">				localPreconditions.add(&quot;\\+ &quot; + taskID + &quot;_Att(S)&quot;);</span>
+
+				//
+				// Preconditions due to mutual XOR
+				//
+<span class="fc bfc" id="L316" title="All 2 branches covered.">				for (DecompositionElement de: getORSiblings(t, new ArrayList&lt;DecompositionElement&gt;())) {</span>
+<span class="fc" id="L317">					localPreconditions.add(&quot;\\+ &quot; + de.getName() + &quot;_Att(S)&quot;);</span>
+<span class="fc" id="L318">				}</span>
+				
+				//
+				// TODO: Preconditions due to PRE LINKS
+				//
+<span class="fc bfc" id="L323" title="All 2 branches covered.">				for (String pres: getPreFormulae(t, new ArrayList&lt;String&gt;())) {</span>
+					//System.out.println(&quot;*** PRE FORMULA: &quot; + de);
+<span class="fc" id="L325">					localPreconditions.add(pres);</span>
+<span class="fc" id="L326">				}</span>
+								
+				//
+				// TODO: Preconditions due to NPR LINKS
+				//
+
+				//
+				// Precondition Rendering
+				//
+<span class="fc" id="L335">				preconditionAxioms += &quot;poss(&quot; + effectID + &quot;,S) :- &quot;;</span>
+				
+<span class="fc bfc" id="L337" title="All 2 branches covered.">				for (String prec:localPreconditions) {</span>
+<span class="fc" id="L338">					preconditionAxioms += prec + &quot;,&quot;; </span>
+<span class="fc" id="L339">				}</span>
+<span class="fc" id="L340">				preconditionAxioms = preconditionAxioms.substring(0, preconditionAxioms.length() - 1) + &quot;.\n&quot;;</span>
+				
+
+<span class="fc" id="L343">			} // Next effect</span>
+
+<span class="fc" id="L345">			localSatFormula = formatter.toSat(taskID) + &quot;(S) :- &quot; +  localSatFormula.substring(0, localSatFormula.length() - 1) + &quot;.\n&quot;;</span>
+<span class="fc" id="L346">			localPreFormula = formatter.toPreFluent(taskID) + &quot;(S) :- &quot; +  localPreFormula.substring(0, localPreFormula.length() - 1) + &quot;.\n&quot;;</span>
+<span class="fc" id="L347">			localAttFormula = formatter.toAtt(taskID) + &quot;(S) :- &quot; +  localAttFormula.substring(0, localAttFormula.length() - 1) + &quot;.\n&quot;;</span>
+
+<span class="pc bpc" id="L349" title="1 of 2 branches missed.">			if (!taskPrecond.equals(&quot;&quot;)) {</span>
+<span class="fc" id="L350">				taskPrecond = taskPrecond.substring(0, taskPrecond.length() - 1);</span>
+<span class="fc" id="L351">				taskPrecond = &quot;poss(&quot; + taskID + &quot;,S) :- (&quot; + taskPrecond + &quot;).\n&quot;;</span>
+			} else {
+<span class="nc" id="L353">				taskPrecond = &quot;poss(&quot; + taskID + &quot;,S).\n&quot;;</span>
+			}
+<span class="fc" id="L355">			preconditionAxiomsTasks += taskPrecond; </span>
+			
+<span class="fc" id="L357">			restoreSitArg += &quot;restoreSitArg(&quot; + formatter.toSat(taskID) + &quot;,S,&quot; + formatter.toSat(taskID) + &quot;(S)).\n&quot;;</span>
+			//restoreSitArg += &quot;restoreSitArg(&quot; + formatter.toPreFluent(taskID) + &quot;,S,&quot; + formatter.toPreFluent(taskID) + &quot;(S)).\n&quot;;
+<span class="fc" id="L359">			restoreSitArg += &quot;restoreSitArg(&quot; + formatter.toAtt(taskID) + &quot;,S,&quot; + formatter.toAtt(taskID) + &quot;(S)).\n&quot;;</span>
+			
+<span class="fc" id="L361">			nonDetActions = nonDetActions.substring(0, nonDetActions.length() - 1) + &quot;]).\n&quot;;</span>
+			
+<span class="fc" id="L363">			satisfactionFormulae += localSatFormula;</span>
+			//satisfactionFormulaePre += localPreFormula;
+<span class="fc" id="L365">			attemptFormulae += localAttFormula;</span>
+
+<span class="pc bpc" id="L367" title="1 of 2 branches missed.">			if (t.getPreFormula() != null) {</span>
+				//System.out.println(parseBooleanFormula(t.getPreFormula()));
+			}
+
+<span class="fc" id="L371">		} // Task</span>
+
+		// Task post-processing
+<span class="fc" id="L374">		agentActionList = agentActionList.substring(0, agentActionList.length() - 1) + &quot;]).\n&quot;;</span>
+<span class="fc" id="L375">		stochasticActionList = stochasticActionList.substring(0, stochasticActionList.length() - 1) + &quot;]).\n&quot;;</span>
+		
+		
+		/* 
+		 *  Process Goals
+		 */
+<span class="fc bfc" id="L381" title="All 2 branches covered.">		for (Goal g:a.getGoals()) {</span>
+<span class="fc" id="L382">			String procOp = &quot;&quot;;</span>
+<span class="fc" id="L383">			String formOp = &quot;&quot;;</span>
+<span class="fc" id="L384">			String goalID =  formatter.toCamelCase(g.getName());</span>
+			
+		
+<span class="fc bfc" id="L387" title="All 2 branches covered.">			if (g.getDecompType() == DecompType.AND) { // AND Decomposed</span>
+<span class="fc" id="L388">				procOp = &quot; : &quot;;</span>
+<span class="fc" id="L389">				formOp = &quot;,&quot;;</span>
+<span class="pc bpc" id="L390" title="1 of 2 branches missed.">			} else if (g.getDecompType() == DecompType.OR) { //OR Decomposed</span>
+<span class="fc" id="L391">				procOp = &quot; # &quot;;</span>
+<span class="fc" id="L392">				formOp = &quot;;&quot;;</span>
+			}
+			
+<span class="fc" id="L395">			String procLine = &quot;&quot;;</span>
+<span class="fc" id="L396">			String localSatFormula = goalID + &quot;_Sat(S) :- &quot;;</span>
+<span class="fc" id="L397">			String localAttFormula = goalID + &quot;_Att(S) :- &quot;;</span>
+<span class="fc" id="L398">			String localPreFormula = goalID + &quot;_Pre(S) :- &quot;;</span>
+<span class="fc" id="L399">			ArrayList&lt;String&gt; procChildren = new ArrayList&lt;String&gt;();</span>
+			
+<span class="fc bfc" id="L401" title="All 2 branches covered.">			for (DecompositionElement l: g.getChildren()) {</span>
+<span class="fc" id="L402">				String childID = formatter.toCamelCase(l.getName());</span>
+<span class="fc" id="L403">				procChildren.add(childID);</span>
+				//procLine += childID + procOp;
+<span class="fc" id="L405">				localSatFormula += childID + &quot;_Sat(S)&quot; + formOp;</span>
+<span class="fc" id="L406">				localPreFormula += childID + &quot;_Pre(S)&quot; + formOp;</span>
+<span class="fc" id="L407">				localAttFormula += childID + &quot;_Att(S)&quot; + &quot;;&quot;;</span>
+<span class="fc" id="L408">			}</span>
+			
+<span class="fc bfc" id="L410" title="All 2 branches covered.">			if (g.getDecompType() == DecompType.AND) { // AND Decomposed</span>
+<span class="fc" id="L411">				ArrayList&lt;String&gt; permutes = new ArrayList&lt;String&gt;();</span>
+<span class="fc" id="L412">				PermutationsGenerator permutator = new PermutationsGenerator();</span>
+<span class="fc" id="L413">				permutes = (ArrayList&lt;String&gt;) permutator.generatePermutations(procChildren);</span>
+<span class="fc bfc" id="L414" title="All 2 branches covered.">				for (String permute:permutes) {</span>
+<span class="fc" id="L415">					procLine += &quot;proc(&quot; + goalID + &quot;, &quot; + permute + &quot;).\n&quot;;  </span>
+<span class="fc" id="L416">				}</span>
+<span class="fc" id="L417">			} else {</span>
+<span class="fc" id="L418">				procLine = &quot;proc(&quot; + goalID + &quot;, &quot;;</span>
+<span class="fc bfc" id="L419" title="All 2 branches covered.">				for (String child:procChildren) {</span>
+<span class="fc" id="L420">					procLine += child + procOp;</span>
+<span class="fc" id="L421">				}</span>
+<span class="fc" id="L422">				procLine = procLine.substring(0, procLine.length() - 3) + &quot;).\n&quot;;</span>
+			}
+			
+			
+			
+			
+<span class="fc" id="L428">			localSatFormula = localSatFormula.substring(0, localSatFormula.length() - 1) + &quot;.\n&quot;;</span>
+<span class="fc" id="L429">			localAttFormula = localAttFormula.substring(0, localAttFormula.length() - 1) + &quot;.\n&quot;;</span>
+<span class="fc" id="L430">			localPreFormula = localPreFormula.substring(0, localPreFormula.length() - 1) + &quot;.\n&quot;;</span>
+			
+
+<span class="fc" id="L433">			restoreSitArg += &quot;restoreSitArg(&quot; + formatter.toSat(goalID) + &quot;,S,&quot; + formatter.toSat(goalID) + &quot;(S)).\n&quot;;</span>
+			//restoreSitArg += &quot;restoreSitArg(&quot; + formatter.toPreFluent(taskID) + &quot;,S,&quot; + formatter.toPreFluent(taskID) + &quot;(S)).\n&quot;;
+<span class="fc" id="L435">			restoreSitArg += &quot;restoreSitArg(&quot; + formatter.toAtt(goalID) + &quot;,S,&quot; + formatter.toAtt(goalID) + &quot;(S)).\n&quot;;</span>
+			
+<span class="fc" id="L437">			satisfactionFormulae += localSatFormula;</span>
+<span class="fc" id="L438">			attemptFormulae += localAttFormula;</span>
+			//satisfactionFormulaePre += localPreFormula;
+<span class="fc" id="L440">			procedures += procLine;</span>
+<span class="fc" id="L441">		}</span>
+
+<span class="fc" id="L443">		rootSat = &quot;goalAchieved(S) :- &quot; + a.getGoalRoot().getName() + &quot;_Sat(S).\n&quot;;</span>
+<span class="fc" id="L444">		procedures += &quot;dtgRun :- write('Policy: '), bp(&quot; + a.getGoalRoot().getName() + &quot;,10,_,U,P,x),nl,&quot;</span>
+				+ &quot;\n        write('Utility: '),writeln(U), &quot;
+				+ &quot;\n        write('Probability: '),writeln(P).\n&quot;;
+		
+<span class="fc" id="L448">		procedures += &quot;dtgRun(L,U,P) :-  with_output_to(string(_),bp(&quot; + a.getGoalRoot().getName() + &quot;,10,L,U,P,x)).\n&quot;;</span>
+		
+		/* 
+		 *  Process Qualities
+		 */
+<span class="fc" id="L453">		String rewardTotal = &quot;&quot;;</span>
+<span class="fc bfc" id="L454" title="All 2 branches covered.">		for (Quality o:a.getQualities()) {</span>
+
+<span class="fc" id="L456">			String header =</span>
+<span class="fc" id="L457">					o.getName() + &quot;(V_init,s0) :- getInitValue(&quot; + o.getName() + &quot;,V_init),!.\n&quot;;</span>
+<span class="fc" id="L458">			String indent = &quot; &quot;.repeat((o.getName() + &quot;(0,s0) :- &quot;).length());</span>
+
+<span class="fc bfc" id="L460" title="All 4 branches covered.">			boolean addInit = !parser.isOperantOfPrevious(o, o.getFormula()) &amp;&amp; isInCrossRun(o,a.getCrossRunSet());</span>
+
+<span class="fc bfc" id="L462" title="All 2 branches covered.">			if (addInit) {</span>
+<span class="fc" id="L463">				String part1 = o.getName() + &quot;(V,S) :-&quot; + o.getName() + &quot;(R_&quot; + o.getName() + &quot;_init,s0),\n&quot; +</span>
+<span class="fc" id="L464">						parser.parseSimpleQualityExpressionPart1(o.getFormula(),indent);</span>
+<span class="fc" id="L465">				String part2 = indent + &quot;V is R_&quot; + o.getName() + &quot;_init +\n&quot; + parser.parseSimpleQualityExpressionPart2(o.getFormula(),indent) + &quot;.\n&quot;;</span>
+<span class="fc" id="L466">				rewardFormulae +=  header + part1 + part2 + &quot;\n\n&quot;;</span>
+<span class="fc" id="L467">			} else {</span>
+<span class="fc" id="L468">				String part1 = o.getName() + &quot;(V,S) :- \n&quot; + parser.parseSimpleQualityExpressionPart1(o.getFormula(),indent);</span>
+<span class="fc" id="L469">				String part2 = indent + &quot;V is \n&quot; + parser.parseSimpleQualityExpressionPart2(o.getFormula(),indent) + &quot;.\n&quot;;</span>
+<span class="fc" id="L470">				rewardFormulae +=  header + part1 + part2 + &quot;\n\n&quot;;				</span>
+			}
+			
+<span class="fc" id="L473">			restoreSitArg += &quot;restoreSitArg(&quot; + o.getName() + &quot;(X),S,&quot; + o.getName() + &quot;(X,S)).\n&quot;;</span>
+			
+<span class="fc bfc" id="L475" title="All 2 branches covered.">			if (o.isRoot()) {</span>
+<span class="fc" id="L476">				rewardTotal = &quot;rewardInst(R,S) :- &quot; + o.getName() + &quot;(R,S).\n&quot;;</span>
+			}
+<span class="fc" id="L478">		}</span>
+<span class="fc" id="L479">		rewardFormulae += &quot;\n&quot; + rewardTotal + &quot;\n&quot;;</span>
+		
+		
+<span class="fc" id="L482">		satisfactionFormulae += &quot;\n\n% Condition Box Related\n&quot;;</span>
+		
+<span class="fc bfc" id="L484" title="All 2 branches covered.">		for (Condition cond:a.getConditions()) {</span>
+			//fluentList += cond.getName() + &quot;_fl,&quot;;
+<span class="fc" id="L486">			satisfactionFormulae += cond.getName() + &quot;_fl(s0) :- !,initiallyTrue(&quot; + cond.getName() + &quot;_fl).\n&quot;;</span>
+<span class="fc" id="L487">			satisfactionFormulae += cond.getName() + &quot;_fl(S) :- &quot; + parser.parseConditionExpression(cond.getFormula()) + &quot;.\n&quot;;</span>
+<span class="fc" id="L488">			restoreSitArg += &quot;restoreSitArg(&quot; + cond.getName() + &quot;_fl,S,&quot; + cond.getName() + &quot;_fl(S)).\n&quot;;</span>
+<span class="fc" id="L489">		}</span>
+		
+<span class="fc" id="L491">		satisfactionFormulae += &quot;\n\n% Effect Related\n&quot; + satisfactionFormulae_Effects + &quot;\n&quot;;  </span>
+		
+<span class="fc" id="L493">		fluentList = fluentList.substring(0, fluentList.length() - 1) + &quot;]).\n&quot;;</span>
+		
+		
+<span class="pc bpc" id="L496" title="1 of 2 branches missed.">		if (outputFile.equals(&quot;&quot;)) {</span>
+<span class="nc" id="L497">			printToStdOut(getSpecFromVars(printDate));</span>
+		} else {
+<span class="fc" id="L499">			printToFile(getSpecFromVars(printDate));</span>
+		}
+<span class="fc" id="L501">	}</span>
+
+	
+	
+	private boolean isInCrossRun(Element e,CrossRunSet crs) {
+<span class="fc" id="L506">		boolean found = false;</span>
+<span class="fc bfc" id="L507" title="All 2 branches covered.">		for (Element cr: crs.getElements()) {</span>
+<span class="fc bfc" id="L508" title="All 4 branches covered.">			found = found || cr.getName().equals(e.getName());</span>
+<span class="fc" id="L509">		}</span>
+<span class="fc" id="L510">		return found;</span>
+	}
+	
+	
+	private String	getCurrentTime(){
+<span class="nc" id="L515">	    LocalDateTime now = LocalDateTime.now();</span>
+<span class="nc" id="L516">	    DateTimeFormatter formatter = DateTimeFormatter.ofPattern(&quot;yyyy-MM-dd HH:mm:ss&quot;);</span>
+<span class="nc" id="L517">	    return(now.format(formatter));</span>
+	}
+
+	private String getSpecFromVars(boolean printDate) {
+<span class="fc" id="L521">		return (</span>
+		
+		&quot;% DT-Golog Specification for Model: &quot; + modelName + &quot; \n&quot; +
+<span class="pc bpc" id="L524" title="1 of 2 branches missed.">		&quot;% Date Translated: &quot; + (printDate ? getCurrentTime():&quot;TEST&quot;)  + &quot; \n&quot; +</span>
+		&quot;% From source: &quot; + modelName + &quot; \n&quot; +
+		&quot;% Using DTTRanslate \n&quot; +
+		header + &quot;\n\n&quot; +
+		
+		&quot;%\n% OPTIONS \n% \n\n&quot; +
+		numRuns + &quot;\n&quot; +
+		problemType + &quot;\n&quot; +
+		
+		&quot;\n\n%\n% CROSS-RUN ELEMENTS \n% \n\n&quot; +
+		crossRunSet + &quot;\n\n&quot; +
+		
+		&quot;\n\n%\n% EXPORTED STATE ELEMENTS \n% \n\n&quot; +
+		discreteExportedSet + &quot;\n\n&quot; +
+		continuousExportedSet + &quot;\n\n&quot; +
+		
+		&quot;\n\n%\n% INITIALIZATIONS \n% \n\n&quot; +
+		initList + &quot;\n\n&quot; +
+		
+		
+		&quot;\n\n%\n% ACTION LISTS \n% \n\n&quot; +
+		agentActionList + &quot;\n&quot; +
+		agentActions + &quot;\n&quot; +
+		stochasticActionList + &quot;\n&quot; +
+		stochasticActions + &quot;\n&quot; +
+		nonDetActions + &quot;\n&quot; +
+		probabilities + &quot;\n&quot; +
+
+		&quot;\n\n%\n% PROCEDURES \n% \n\n&quot; +
+		procedures + &quot;\n&quot; +
+		
+		&quot;\n\n%\n% FLUENT LISTS \n% \n\n&quot; +
+		fluentList + &quot;\n&quot; +
+		
+		&quot;%\n% SUCCESSOR STATE AXIOMS \n% \n\n&quot; +
+		successorStateAxioms + &quot;\n&quot; +
+
+		&quot;%\n% PRECONDITION AXIOMS \n% \n\n&quot; +
+		preconditionAxioms + &quot;\n\n&quot; +
+		preconditionAxiomsTasks + &quot;\n&quot; +
+		
+		&quot;%\n% SATISFACTION FORMULAE \n% \n\n&quot; +
+		satisfactionFormulae + &quot;\n&quot; +
+		
+		&quot;%\n% ATTEMPT FORMULAE \n% \n\n&quot; +
+		attemptFormulae + &quot;\n&quot; +
+		
+		&quot;%\n% ROOT SATISFACTION \n% \n\n&quot; +
+		rootSat + &quot;\n&quot; +
+
+		
+		&quot;%\n% REWARD FORMULAE \n% \n\n&quot; +
+		rewardFormulae + &quot;\n&quot; +
+		
+		&quot;%\n% SENSE CONDITIONS \n% \n\n&quot; +
+		senseConditions + &quot;\n&quot; +
+		
+		&quot;%\n% RESTORE SITUATION ARGUMENT \n% \n\n&quot; +
+		restoreSitArg + &quot;\n&quot;);
+	}
+	
+
+	
+	private String getHeader() {
+<span class="fc" id="L588">		return (&quot;:-style_check(-discontiguous).\n&quot;</span>
+				+ &quot;:-style_check(-singleton).\n&quot;
+				+ &quot;:- multifile getRewardMode/1.\n&quot;
+				+ &quot;:- multifile getRewardModeDTG/1.\n&quot;
+				+ &quot;:- multifile deadlockPenalty/1.\n&quot;
+				+ &quot;:- multifile getInfeasiblePenalty/1.\n&quot;
+				+ &quot;:- multifile val/2.\n&quot;
+				+ &quot;:-dynamic(init/1).\n\n&quot;);
+	}
+
+	
+	private void printToFile(String s) {
+		
+<span class="fc" id="L601">        File outFile = new File(this.outputFile);</span>
+
+        // Ensure the &quot;output&quot; directory exists
+<span class="fc" id="L604">        File parentDir = outFile.getParentFile();</span>
+<span class="pc bpc" id="L605" title="2 of 4 branches missed.">        if (parentDir != null &amp;&amp; !parentDir.exists()) {</span>
+<span class="nc" id="L606">            parentDir.mkdirs();</span>
+        }
+
+<span class="fc" id="L609">        try (BufferedWriter writer = new BufferedWriter(new FileWriter(outFile))) {</span>
+<span class="fc" id="L610">	    	writer.write(s);</span>
+<span class="fc" id="L611">	        System.out.println(&quot;Written to file successfully.&quot;);</span>
+<span class="nc" id="L612">	    } catch (IOException e) {</span>
+<span class="nc" id="L613">	        e.printStackTrace();</span>
+<span class="fc" id="L614">	    }</span>
+<span class="fc" id="L615">	}</span>
+
+	private void printToStdOut(String s) {
+<span class="nc" id="L618">		System.out.println(s);</span>
+<span class="nc" id="L619">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

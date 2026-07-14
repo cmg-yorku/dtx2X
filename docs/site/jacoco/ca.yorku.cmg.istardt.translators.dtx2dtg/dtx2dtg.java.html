@@ -1,0 +1,550 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>dtx2dtg.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">dtx2X</a> &gt; <a href="index.source.html" class="el_package">ca.yorku.cmg.istardt.translators.dtx2dtg</a> &gt; <span class="el_source">dtx2dtg.java</span></div><h1>dtx2dtg.java</h1><pre class="source lang-java linenums">package ca.yorku.cmg.istardt.translators.dtx2dtg;
+
+import io.github.nina2dv.xmlvalidation.XmlValidation;
+import ca.yorku.cmg.istardt.xmlparser.objects.*;
+import ca.yorku.cmg.istardt.xmlparser.xml.IStarUnmarshaller;
+import ca.yorku.cmg.istardt.xmlparser.xml.utils.CustomLogger;
+
+import java.io.File;
+import java.util.List;
+
+/**
+ * Main application entry point demonstrating the use of the Jackson XML-based unmarshaller with validation.
+ */
+<span class="nc" id="L14">public class dtx2dtg {</span>
+
+    private static final String XSD_SCHEMA_PATH = &quot;src/main/resources/xsd/istar_dt_x_schema.xsd&quot;;
+    private static final String SCHEMATRON_SCHEMA_PATH = &quot;src/main/resources/schematron/istar_dt_x_schematron.sch&quot;;
+
+<span class="nc" id="L19">    private static final CustomLogger LOGGER = CustomLogger.getInstance();</span>
+<span class="nc" id="L20">    static boolean debugMode = false;</span>
+
+<span class="nc" id="L22">    static String inputFile = &quot;&quot;;</span>
+<span class="nc" id="L23">	static String outputFile =&quot;&quot;;</span>
+<span class="nc" id="L24">	static boolean printUsage = false;</span>
+    
+<span class="nc" id="L26">	static boolean translate = true;</span>
+<span class="nc" id="L27">	static boolean validate = true;</span>
+<span class="nc" id="L28">	static boolean print = false;</span>
+<span class="nc" id="L29">	static boolean unmarshal = true;</span>
+	
+    
+    
+    public static void main(String[] args) {
+
+<span class="nc" id="L35">        LOGGER.setDebugEnabled(debugMode);</span>
+
+        try {
+<span class="nc" id="L38">        	processArgs(args);</span>
+<span class="nc" id="L39">        	File xmlFile = new File(inputFile);</span>
+
+<span class="nc bnc" id="L41" title="All 2 branches missed.">            if (validate) {</span>
+<span class="nc" id="L42">                File xsdFile = new File(XSD_SCHEMA_PATH);</span>
+<span class="nc" id="L43">                File schematronFile = new File(SCHEMATRON_SCHEMA_PATH);</span>
+                
+<span class="nc bnc" id="L45" title="All 2 branches missed.">                if (!xsdFile.exists()) {</span>
+<span class="nc" id="L46">                    System.err.println(&quot;Error: XSD schema file not found: &quot; + XSD_SCHEMA_PATH);</span>
+<span class="nc" id="L47">                    System.exit(1);</span>
+                }
+
+<span class="nc bnc" id="L50" title="All 2 branches missed.">                if (!schematronFile.exists()) {</span>
+<span class="nc" id="L51">                    System.err.println(&quot;Error: Schematron schema file not found: &quot; + SCHEMATRON_SCHEMA_PATH);</span>
+<span class="nc" id="L52">                    System.exit(1);</span>
+                }
+
+	            // Validate XML against XSD schema
+<span class="nc" id="L56">	            System.out.println(&quot;Validating XML against XSD schema...&quot;);</span>
+	            try {
+<span class="nc" id="L58">	                XmlValidation.validate(&quot;xsd&quot;, xsdFile.getAbsolutePath(), xmlFile.getAbsolutePath());</span>
+<span class="nc" id="L59">	            } catch (Exception e) {</span>
+<span class="nc" id="L60">	                System.err.println(&quot;XSD validation failed:&quot;);</span>
+<span class="nc" id="L61">	                System.err.println(e.getMessage());</span>
+<span class="nc" id="L62">	                System.exit(1);</span>
+<span class="nc" id="L63">	            }</span>
+	
+	            // Validate XML against Schematron schema
+<span class="nc" id="L66">	            System.out.println(&quot;Validating XML against Schematron schema...&quot;);</span>
+	            try {
+<span class="nc" id="L68">	                XmlValidation.validate(&quot;schematron&quot;, schematronFile.getAbsolutePath(), xmlFile.getAbsolutePath());</span>
+<span class="nc" id="L69">	            } catch (Exception e) {</span>
+<span class="nc" id="L70">	                System.err.println(&quot;Schematron validation failed:&quot;);</span>
+<span class="nc" id="L71">	                System.err.println(e.getMessage());</span>
+<span class="nc" id="L72">	                System.exit(1);</span>
+<span class="nc" id="L73">	            }</span>
+
+            }
+            
+            
+            //Unmarshall only if you are asked to translate, print, or both
+<span class="nc bnc" id="L79" title="All 4 branches missed.">            unmarshal = print || translate;</span>
+            
+<span class="nc bnc" id="L81" title="All 2 branches missed.">            if (unmarshal) {</span>
+                // Create unmarshaller
+<span class="nc" id="L83">                System.out.println(&quot;Unmarshalling XML...&quot;);</span>
+<span class="nc" id="L84">                IStarUnmarshaller unmarshaller = new IStarUnmarshaller();</span>
+                // Unmarshal XML to model
+<span class="nc" id="L86">                Model model = unmarshaller.unmarshalToModel(xmlFile);</span>
+
+<span class="nc bnc" id="L88" title="All 2 branches missed.">                if (print) {</span>
+<span class="nc" id="L89">                    printModelInformation(model);</span>
+                   }
+                
+<span class="nc bnc" id="L92" title="All 2 branches missed.">                if (translate) {</span>
+<span class="nc" id="L93">                    System.out.println(&quot;Tranlsating...&quot;);</span>
+<span class="nc" id="L94">                    com2dtg trans = new com2dtg(model,outputFile);</span>
+<span class="nc" id="L95">                    trans.translate(true);</span>
+                }            	
+            }
+            
+<span class="nc" id="L99">        } catch (Exception e) {</span>
+<span class="nc" id="L100">            System.err.println(&quot;Unexpected error: &quot; + e.getMessage());</span>
+<span class="nc" id="L101">            e.printStackTrace();</span>
+<span class="nc" id="L102">        }</span>
+<span class="nc" id="L103">    }</span>
+
+    
+    /** 
+     * 
+     * Argument Handling
+     * 
+     */
+    
+	private static String printUsage() {
+<span class="nc" id="L113">		String s = &quot;&quot;;</span>
+<span class="nc" id="L114">		s = &quot;Usage: dtx2dtg [-options]\n&quot; + </span>
+				&quot;where options are:\n&quot; +
+				&quot;    -f filename \t iStarDT-X XML file \n&quot; + 
+				&quot;    -o filename \t DT-Golog PL file \n&quot; +
+				&quot;    -t \t\t\t translate only (skip validation) \n&quot; +
+				&quot;    -v \t\t\t validate only (skip tranlsation) \n&quot; +
+				&quot;    -p \t\t\t print model info  \n&quot; +
+				&quot;    -h \t\t\t prints this help \n&quot;;
+<span class="nc" id="L122">		return(s);</span>
+	}
+	
+
+	private static void processArgs(String[] args) throws Exception {
+<span class="nc bnc" id="L127" title="All 2 branches missed.">	       for (int i = 0; i &lt; args.length; i++) {</span>
+<span class="nc" id="L128">	            String arg = args[i];</span>
+<span class="nc bnc" id="L129" title="All 2 branches missed.">	            if (arg.startsWith(&quot;-&quot;)) {</span>
+<span class="nc" id="L130">	                char option = arg.charAt(1);</span>
+<span class="nc bnc" id="L131" title="All 7 branches missed.">	                switch (option) {</span>
+		                case 'f':
+<span class="nc bnc" id="L133" title="All 2 branches missed.">		                    if (i + 1 &lt; args.length) {</span>
+<span class="nc" id="L134">		                        inputFile = args[i + 1];</span>
+<span class="nc" id="L135">		                        i++;</span>
+		                    } else {
+<span class="nc" id="L137">		                    	printUsage = true;</span>
+<span class="nc" id="L138">			                	throw new Exception(&quot;Option -f requires a file name.&quot;);</span>
+		                    }
+		                	break;
+		            	case 'o':
+<span class="nc bnc" id="L142" title="All 2 branches missed.">		                    if (i + 1 &lt; args.length) {</span>
+<span class="nc" id="L143">		                        outputFile = args[i + 1];</span>
+<span class="nc" id="L144">		                        i++;</span>
+		                    } else {
+<span class="nc" id="L146">		                    	printUsage = true;</span>
+<span class="nc" id="L147">			                	throw new Exception(&quot;Option -o requires a file name.&quot;);</span>
+		                    }
+		                    break;
+		            	case 't':
+<span class="nc" id="L151">		            		validate = false;</span>
+<span class="nc" id="L152">		            		break;</span>
+		            	case 'v':
+<span class="nc" id="L154">		            		translate = false;</span>
+<span class="nc" id="L155">		            		break;</span>
+		            	case 'p':
+<span class="nc" id="L157">		            		print = true;</span>
+<span class="nc" id="L158">		            		break;</span>
+		            	case 'h':
+<span class="nc" id="L160">		                    System.out.println(printUsage());</span>
+<span class="nc" id="L161">		                    System.exit(0);</span>
+		                default:
+<span class="nc" id="L163">	                    	printUsage = true;</span>
+<span class="nc" id="L164">		                	throw new Exception(&quot;Unknown option: &quot; + option);</span>
+	                }
+<span class="nc" id="L166">	            } else {</span>
+<span class="nc" id="L167">	            	printUsage = true;</span>
+<span class="nc" id="L168">	                throw new Exception(&quot;Invalid argument: &quot; + arg);</span>
+	            }
+	        }
+	       
+<span class="nc bnc" id="L172" title="All 2 branches missed.">	       if (args.length == 0) {</span>
+<span class="nc" id="L173">	       		printUsage = true;</span>
+<span class="nc" id="L174">	       		throw new Exception(&quot;No arguments provided. Use -h for help.&quot;);</span>
+	       }
+
+<span class="nc bnc" id="L177" title="All 2 branches missed.">	       if (inputFile.isEmpty()) {</span>
+<span class="nc" id="L178">	    	   printUsage = true;</span>
+<span class="nc" id="L179">	    	   throw new Exception(&quot;No input file specified. Use -f to specify input file.&quot;);</span>
+	       }
+	       
+<span class="nc" id="L182">	       File inpF = new File(inputFile);</span>
+<span class="nc bnc" id="L183" title="All 2 branches missed.">	       if (!inpF.exists()) {</span>
+<span class="nc" id="L184">	           throw new Exception(&quot;Input file does not exist: &quot; + inputFile);</span>
+	       }
+<span class="nc" id="L186">		}</span>
+
+
+	
+	
+
+	
+	
+	
+    
+//&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+//=======
+//    
+//    public static void main(String[] args) {
+//
+//        LOGGER.setDebugEnabled(debugMode);
+//
+//        try {
+//        	processArgs(args);
+//        	File xmlFile = new File(inputFile);
+//            File xsdFile = new File(XSD_SCHEMA_PATH);
+//            File schematronFile = new File(SCHEMATRON_SCHEMA_PATH);
+//            
+//            if (!xsdFile.exists()) {
+//                System.err.println(&quot;Error: XSD schema file not found: &quot; + XSD_SCHEMA_PATH);
+//                System.exit(1);
+//            }
+//
+//            if (!schematronFile.exists()) {
+//                System.err.println(&quot;Error: Schematron schema file not found: &quot; + SCHEMATRON_SCHEMA_PATH);
+//                System.exit(1);
+//            }
+//
+//
+//            // Validate XML against XSD schema
+//            System.out.println(&quot;Validating XML against XSD schema...&quot;);
+//            try {
+//                XmlValidation.validate(&quot;xsd&quot;, xsdFile.getAbsolutePath(), xmlFile.getAbsolutePath());
+//            } catch (Exception e) {
+//                System.err.println(&quot;XSD validation failed:&quot;);
+//                System.err.println(e.getMessage());
+//                System.exit(1);
+//            }
+//
+//            // Validate XML against Schematron schema
+//            System.out.println(&quot;Validating XML against Schematron schema...&quot;);
+//            try {
+//                XmlValidation.validate(&quot;schematron&quot;, schematronFile.getAbsolutePath(), xmlFile.getAbsolutePath());
+//            } catch (Exception e) {
+//                System.err.println(&quot;Schematron validation failed:&quot;);
+//                System.err.println(e.getMessage());
+//                System.exit(1);
+//            }
+//
+//
+//            // Create unmarshaller
+//            System.out.println(&quot;Unmarshalling XML...&quot;);
+//            IStarUnmarshaller unmarshaller = new IStarUnmarshaller();
+//
+//            // Unmarshal XML to model
+//            Model model = unmarshaller.unmarshalToModel(xmlFile);
+//
+//            // Display model information
+//            //printModelInformation(model);
+//
+//            /**
+//             * SOTIRIOS added tests
+//             */
+//            System.out.println(&quot;Tranlsating...&quot;);
+//            com2dtg trans = new com2dtg(model,outputFile);
+//            //trans.exportedSetTest();
+//            //trans.initializationTest();
+//            //trans.crossRunTest();
+//            //trans.conditionExpressionTest();
+//            trans.translate();
+//
+//
+//        } catch (Exception e) {
+//            System.err.println(&quot;Unexpected error: &quot; + e.getMessage());
+//            e.printStackTrace();
+//        }
+//    }
+//
+//&gt;&gt;&gt;&gt;&gt;&gt;&gt; refs/remotes/upstream/main
+	
+	
+	
+    /** 
+     * 
+     * M O D E L   P R I N T I N G
+     * 
+     */
+	
+	
+    /**
+     * Print information about the model structure.
+     *
+     * @param model The model to print information about
+     */
+    private static void printModelInformation(Model model) {
+<span class="nc" id="L286">        System.out.println(&quot;\n=== iStar-DT-X Model Information ===&quot;);</span>
+<span class="nc" id="L287">        System.out.println(&quot;Number of actors: &quot; + model.getActors().size());</span>
+
+        // Process each actor
+<span class="nc" id="L290">        int actorCount = 1;</span>
+<span class="nc bnc" id="L291" title="All 2 branches missed.">        for (Actor actor : model.getActors()) {</span>
+<span class="nc bnc" id="L292" title="All 2 branches missed.">            String titleText = actor.getAtom() != null ? actor.getAtom().getTitleText() : &quot;Unknown&quot;;</span>
+<span class="nc bnc" id="L293" title="All 4 branches missed.">            String description = actor.getAtom() != null &amp;&amp; actor.getAtom().getDescription() != null ?</span>
+<span class="nc" id="L294">                    &quot;\n  Description: &quot; + actor.getAtom().getDescription() : &quot;&quot;;</span>
+
+<span class="nc" id="L296">            System.out.println(&quot;\nActor &quot; + actorCount + &quot;: &quot; + titleText + description);</span>
+
+            // Goals
+<span class="nc" id="L299">            List&lt;Goal&gt; goals = actor.getGoals();</span>
+<span class="nc" id="L300">            System.out.println(&quot;  Goals (&quot; + goals.size() + &quot;):&quot;);</span>
+<span class="nc bnc" id="L301" title="All 2 branches missed.">            for (Goal goal : goals) {</span>
+<span class="nc" id="L302">                printGoalInfo(goal, 2);</span>
+<span class="nc" id="L303">            }</span>
+
+            // Tasks
+<span class="nc" id="L306">            List&lt;Task&gt; tasks = actor.getTasks();</span>
+<span class="nc" id="L307">            System.out.println(&quot;  Tasks (&quot; + tasks.size() + &quot;):&quot;);</span>
+<span class="nc bnc" id="L308" title="All 2 branches missed.">            for (Task task : tasks) {</span>
+<span class="nc" id="L309">                printTaskInfo(task, 2);</span>
+<span class="nc" id="L310">            }</span>
+
+            // Qualities
+<span class="nc" id="L313">            List&lt;Quality&gt; qualities = actor.getQualities();</span>
+<span class="nc" id="L314">            System.out.println(&quot;  Qualities (&quot; + qualities.size() + &quot;):&quot;);</span>
+<span class="nc bnc" id="L315" title="All 2 branches missed.">            for (Quality quality : qualities) {</span>
+<span class="nc bnc" id="L316" title="All 4 branches missed.">                String qualityTitleText = quality.getAtom() != null &amp;&amp; quality.getAtom().getTitleText() != null ?</span>
+<span class="nc" id="L317">                        &quot; (&quot; + quality.getAtom().getTitleText() + &quot;)&quot; : &quot;&quot;;</span>
+<span class="nc bnc" id="L318" title="All 4 branches missed.">                String qualityDescription = quality.getAtom() != null &amp;&amp; quality.getAtom().getDescription() != null ?</span>
+<span class="nc" id="L319">                        &quot;\n      Description: &quot; + quality.getAtom().getDescription() : &quot;&quot;;</span>
+<span class="nc bnc" id="L320" title="All 2 branches missed.">                String formulaText = quality.getFormula() != null ?</span>
+<span class="nc" id="L321">                        &quot; [Formula: &quot; + quality.getFormula().getFormula() + &quot;]&quot; : &quot;&quot;;</span>
+
+<span class="nc" id="L323">                System.out.println(&quot;    - &quot; + quality.getId() + qualityTitleText +</span>
+<span class="nc bnc" id="L324" title="All 2 branches missed.">                        (quality.isRoot() ? &quot; [ROOT]&quot; : &quot;&quot;) + formulaText + qualityDescription);</span>
+<span class="nc" id="L325">            }</span>
+
+
+<span class="nc" id="L328">                List&lt;Condition&gt; conditions = actor.getConditions();</span>
+<span class="nc" id="L329">                List&lt;Quality&gt; qualitiesNonDecomp = actor.getQualities();</span>
+<span class="nc" id="L330">                List&lt;Effect&gt; effects = actor.getEffects();</span>
+
+                // Print Conditions (PreBoxes)
+<span class="nc bnc" id="L333" title="All 2 branches missed.">                if (!conditions.isEmpty()) {</span>
+<span class="nc" id="L334">                    System.out.println(&quot;\n  Conditions (PreBoxes): &quot; + conditions.size());</span>
+<span class="nc bnc" id="L335" title="All 2 branches missed.">                    for (Condition condition : conditions) {</span>
+<span class="nc bnc" id="L336" title="All 4 branches missed.">                        String conditionTitleText = condition.getAtom() != null &amp;&amp; condition.getAtom().getTitleText() != null ?</span>
+<span class="nc" id="L337">                                &quot; (&quot; + condition.getAtom().getTitleText() + &quot;)&quot; : &quot;&quot;;</span>
+<span class="nc bnc" id="L338" title="All 4 branches missed.">                        String conditionDescription = condition.getAtom() != null &amp;&amp; condition.getAtom().getDescription() != null ?</span>
+<span class="nc" id="L339">                                &quot;\n      Description: &quot; + condition.getAtom().getDescription() : &quot;&quot;;</span>
+<span class="nc bnc" id="L340" title="All 2 branches missed.">                        String formulaText = condition.getFormula() != null ?</span>
+<span class="nc" id="L341">                                &quot; [Formula: &quot; + condition.getFormula().getFormula() + &quot;]&quot; : &quot;&quot;;</span>
+
+<span class="nc" id="L343">                        System.out.println(&quot;    - &quot; + condition.getId() + conditionTitleText + formulaText + conditionDescription);</span>
+<span class="nc" id="L344">                    }</span>
+                }
+
+                // Print Qualities
+<span class="nc bnc" id="L348" title="All 2 branches missed.">                if (!qualitiesNonDecomp.isEmpty()) {</span>
+<span class="nc" id="L349">                    System.out.println(&quot;\n  Qualities: &quot; + qualitiesNonDecomp.size());</span>
+<span class="nc bnc" id="L350" title="All 2 branches missed.">                    for (Quality quality : qualitiesNonDecomp) {</span>
+<span class="nc bnc" id="L351" title="All 4 branches missed.">                        String qualityTitleText = quality.getAtom() != null &amp;&amp; quality.getAtom().getTitleText() != null ?</span>
+<span class="nc" id="L352">                                &quot; (&quot; + quality.getAtom().getTitleText() + &quot;)&quot; : &quot;&quot;;</span>
+<span class="nc bnc" id="L353" title="All 4 branches missed.">                        String qualityDescription = quality.getAtom() != null &amp;&amp; quality.getAtom().getDescription() != null ?</span>
+<span class="nc" id="L354">                                &quot;\n      Description: &quot; + quality.getAtom().getDescription() : &quot;&quot;;</span>
+<span class="nc bnc" id="L355" title="All 2 branches missed.">                        String formulaText = quality.getFormula() != null ?</span>
+<span class="nc" id="L356">                                &quot; [Formula: &quot; + quality.getFormula().getFormula() + &quot;]&quot; : &quot;&quot;;</span>
+<span class="nc bnc" id="L357" title="All 2 branches missed.">                        String rootText = quality.isRoot() ? &quot; [ROOT]&quot; : &quot;&quot;;</span>
+
+<span class="nc" id="L359">                        System.out.println(&quot;    - &quot; + quality.getId() + qualityTitleText + rootText + formulaText + qualityDescription);</span>
+<span class="nc" id="L360">                    }</span>
+                }
+
+                // Print Effects
+<span class="nc bnc" id="L364" title="All 2 branches missed.">                if (!effects.isEmpty()) {</span>
+<span class="nc" id="L365">                    System.out.println(&quot;\n  Effects: &quot; + effects.size());</span>
+<span class="nc bnc" id="L366" title="All 2 branches missed.">                    for (Effect effect : effects) {</span>
+<span class="nc bnc" id="L367" title="All 4 branches missed.">                        String effectTitleText = effect.getAtom() != null &amp;&amp; effect.getAtom().getTitleText() != null ?</span>
+<span class="nc" id="L368">                                &quot; (&quot; + effect.getAtom().getTitleText() + &quot;)&quot; : &quot;&quot;;</span>
+<span class="nc bnc" id="L369" title="All 4 branches missed.">                        String effectDescription = effect.getAtom() != null &amp;&amp; effect.getAtom().getDescription() != null ?</span>
+<span class="nc" id="L370">                                &quot;\n      Description: &quot; + effect.getAtom().getDescription() : &quot;&quot;;</span>
+
+<span class="nc" id="L372">                        System.out.println(&quot;    - &quot; + effect.getId() + effectTitleText +</span>
+<span class="nc" id="L373">                                &quot; (Probability: &quot; + effect.getProbability() +</span>
+<span class="nc" id="L374">                                &quot;, Satisfying: &quot; + effect.isSatisfying() + &quot;)&quot; + effectDescription);</span>
+<span class="nc" id="L375">                    }</span>
+                }
+<span class="nc" id="L377">            }</span>
+
+<span class="nc" id="L379">            actorCount++;</span>
+<span class="nc" id="L380">    }</span>
+
+    /**
+     * Print information about a goal.
+     */
+    private static void printGoalInfo(Goal goal, int indentLevel) {
+<span class="nc" id="L386">        StringBuilder indent = new StringBuilder();</span>
+<span class="nc bnc" id="L387" title="All 2 branches missed.">        for (int i = 0; i &lt; indentLevel; i++) {</span>
+<span class="nc" id="L388">            indent.append(&quot;  &quot;);</span>
+        }
+
+<span class="nc bnc" id="L391" title="All 4 branches missed.">        String titleText = goal.getAtom() != null &amp;&amp; goal.getAtom().getTitleText() != null ?</span>
+<span class="nc" id="L392">                &quot; (&quot; + goal.getAtom().getTitleText() + &quot;)&quot; : &quot;&quot;;</span>
+<span class="nc bnc" id="L393" title="All 4 branches missed.">        String description = goal.getAtom() != null &amp;&amp; goal.getAtom().getDescription() != null ?</span>
+<span class="nc" id="L394">                &quot;\n&quot; + indent + &quot;  Description: &quot; + goal.getAtom().getDescription() : &quot;&quot;;</span>
+
+<span class="nc" id="L396">        System.out.println(indent + &quot;- &quot; + goal.getId() + titleText +</span>
+<span class="nc bnc" id="L397" title="All 2 branches missed.">                &quot; [Type: &quot; + goal.getDecompType() + &quot;]&quot; + (goal.isRoot() ? &quot;[ROOT]&quot; : &quot;&quot;) + description);</span>
+
+<span class="nc" id="L399">        System.out.println(indent + &quot;  runs: &quot; + goal.getRuns());</span>
+
+        // Print pre formula if available
+<span class="nc" id="L402">        Formula preFormula = goal.getPreFormula();</span>
+<span class="nc bnc" id="L403" title="All 2 branches missed.">        if (preFormula != null) {</span>
+<span class="nc" id="L404">            System.out.println(indent + &quot;  pre formula: &quot; + preFormula.getFormula());</span>
+        } else {
+<span class="nc" id="L406">            System.out.println(indent + &quot;  pre formula: none&quot;);</span>
+        }
+
+        // Print npr formula if available
+<span class="nc" id="L410">        Formula nprFormula = goal.getNprFormula();</span>
+<span class="nc bnc" id="L411" title="All 2 branches missed.">        if (nprFormula != null) {</span>
+<span class="nc" id="L412">            System.out.println(indent + &quot;  npr formula: &quot; + nprFormula.getFormula());</span>
+        } else {
+<span class="nc" id="L414">            System.out.println(indent + &quot;  npr formula: none&quot;);</span>
+        }
+
+        // Print child elements if this is a decomposition element
+<span class="nc bnc" id="L418" title="All 4 branches missed.">        if (goal.getChildren() != null &amp;&amp; !goal.getChildren().isEmpty()) {</span>
+<span class="nc" id="L419">            System.out.println(indent + &quot;  Children:&quot;);</span>
+<span class="nc bnc" id="L420" title="All 2 branches missed.">            for (DecompositionElement child : goal.getChildren()) {</span>
+<span class="nc" id="L421">                printDecompInfo(child, indentLevel + 2);</span>
+<span class="nc" id="L422">            }</span>
+        }
+<span class="nc" id="L424">    }</span>
+
+    /**
+     * Print information about a decomposition element.
+     */
+    private static void printDecompInfo(DecompositionElement decomp, int indentLevel) {
+<span class="nc" id="L430">        StringBuilder indent = new StringBuilder();</span>
+<span class="nc bnc" id="L431" title="All 2 branches missed.">        for (int i = 0; i &lt; indentLevel; i++) {</span>
+<span class="nc" id="L432">            indent.append(&quot;  &quot;);</span>
+        }
+
+        // Print the current element's information
+<span class="nc bnc" id="L436" title="All 2 branches missed.">        String titleText = decomp.getAtom() != null ? &quot; (&quot; + decomp.getAtom().getTitleText() + &quot;)&quot; : &quot;&quot;;</span>
+<span class="nc bnc" id="L437" title="All 4 branches missed.">        String description = decomp.getAtom() != null &amp;&amp; decomp.getAtom().getDescription() != null ?</span>
+<span class="nc" id="L438">                &quot;\n&quot; + indent + &quot;  Description: &quot; + decomp.getAtom().getDescription() : &quot;&quot;;</span>
+
+<span class="nc" id="L440">        System.out.println(indent + &quot;- &quot; + decomp.getId() + titleText +</span>
+<span class="nc" id="L441">                &quot; [Type: &quot; + decomp.getDecompType() + &quot;]&quot; + description);</span>
+
+        // Print pre formula if available
+<span class="nc" id="L444">        Formula preFormula = decomp.getPreFormula();</span>
+<span class="nc bnc" id="L445" title="All 2 branches missed.">        if (preFormula != null) {</span>
+<span class="nc" id="L446">            System.out.println(indent + &quot;  pre formula: &quot; + preFormula.getFormula());</span>
+        }
+
+        // Print npr formula if available
+<span class="nc" id="L450">        Formula nprFormula = decomp.getNprFormula();</span>
+<span class="nc bnc" id="L451" title="All 2 branches missed.">        if (nprFormula != null) {</span>
+<span class="nc" id="L452">            System.out.println(indent + &quot;  npr formula: &quot; + nprFormula.getFormula());</span>
+        }
+
+<span class="nc bnc" id="L455" title="All 4 branches missed.">        if (decomp.getParent() != null &amp;&amp; decomp.getParent().getAtom() != null) {</span>
+<span class="nc" id="L456">            System.out.println(indent + &quot;  Parent: &quot; + decomp.getParent().getAtom().getTitleText());</span>
+        } else {
+<span class="nc" id="L458">            System.out.println(indent + &quot;  Parent: none&quot;);</span>
+        }
+
+        // Print children (but limit depth to avoid too much output)
+<span class="nc bnc" id="L462" title="All 6 branches missed.">        if (decomp.getChildren() != null &amp;&amp; !decomp.getChildren().isEmpty() &amp;&amp; indentLevel &lt; 8) {</span>
+<span class="nc" id="L463">            System.out.println(indent + &quot;  Children:&quot;);</span>
+<span class="nc bnc" id="L464" title="All 2 branches missed.">            for (DecompositionElement child : decomp.getChildren()) {</span>
+<span class="nc" id="L465">                printDecompInfo(child, indentLevel + 2);</span>
+<span class="nc" id="L466">            }</span>
+<span class="nc bnc" id="L467" title="All 4 branches missed.">        } else if (decomp.getChildren() != null &amp;&amp; !decomp.getChildren().isEmpty()) {</span>
+            // If we've gone too deep, just print the number of children
+<span class="nc" id="L469">            System.out.println(indent + &quot;  Children: &quot; + decomp.getChildren().size() + &quot; elements (depth limit reached)&quot;);</span>
+        }
+<span class="nc" id="L471">    }</span>
+
+    /**
+     * Print information about a task.
+     */
+    private static void printTaskInfo(Task task, int indentLevel) {
+<span class="nc" id="L477">        StringBuilder indent = new StringBuilder();</span>
+<span class="nc bnc" id="L478" title="All 2 branches missed.">        for (int i = 0; i &lt; indentLevel; i++) {</span>
+<span class="nc" id="L479">            indent.append(&quot;  &quot;);</span>
+        }
+
+<span class="nc bnc" id="L482" title="All 4 branches missed.">        String titleText = task.getAtom() != null &amp;&amp; task.getAtom().getTitleText() != null ?</span>
+<span class="nc" id="L483">                &quot; (&quot; + task.getAtom().getTitleText() + &quot;)&quot; : &quot;&quot;;</span>
+<span class="nc bnc" id="L484" title="All 4 branches missed.">        String description = task.getAtom() != null &amp;&amp; task.getAtom().getDescription() != null ?</span>
+<span class="nc" id="L485">                &quot;\n&quot; + indent + &quot;  Description: &quot; + task.getAtom().getDescription() : &quot;&quot;;</span>
+
+<span class="nc" id="L487">        System.out.println(indent + &quot;- &quot; + task.getId() + titleText +</span>
+<span class="nc bnc" id="L488" title="All 2 branches missed.">                &quot; [Deterministic: &quot; + task.isDeterministic() + &quot;]&quot; + (task.isRoot()? &quot;[ROOT]&quot; : &quot;&quot;) +</span>
+<span class="nc" id="L489">                &quot; (Type: &quot; + task.getDecompType()+&quot;)&quot; + description);</span>
+
+        // Print pre formula if available
+<span class="nc" id="L492">        Formula preFormula = task.getPreFormula();</span>
+<span class="nc bnc" id="L493" title="All 2 branches missed.">        if (preFormula != null) {</span>
+<span class="nc" id="L494">            System.out.println(indent + &quot;  pre formula: &quot; + preFormula.getFormula());</span>
+        } else {
+<span class="nc" id="L496">            System.out.println(indent + &quot;  pre formula: none&quot;);</span>
+        }
+
+        // Print npr formula if available
+<span class="nc" id="L500">        Formula nprFormula = task.getNprFormula();</span>
+<span class="nc bnc" id="L501" title="All 2 branches missed.">        if (nprFormula != null) {</span>
+<span class="nc" id="L502">            System.out.println(indent + &quot;  npr formula: &quot; + nprFormula.getFormula());</span>
+        } else {
+<span class="nc" id="L504">            System.out.println(indent + &quot;  npr formula: none&quot;);</span>
+        }
+
+<span class="nc bnc" id="L507" title="All 2 branches missed.">        if (task.getParent() != null) {</span>
+<span class="nc" id="L508">            System.out.println(indent + &quot;  Parent: &quot; + task.getParent().getAtom().getTitleText());</span>
+        } else {
+<span class="nc" id="L510">            System.out.println(indent + &quot;  Parent: none&quot;);</span>
+        }
+
+        // Print effects
+<span class="nc bnc" id="L514" title="All 4 branches missed.">        if (task.getEffects() != null &amp;&amp; !task.getEffects().isEmpty()) {</span>
+<span class="nc" id="L515">            System.out.println(indent + &quot;  Effects:&quot;);</span>
+<span class="nc bnc" id="L516" title="All 2 branches missed.">            for (Effect effect : task.getEffects()) {</span>
+<span class="nc bnc" id="L517" title="All 4 branches missed.">                String effectTitleText = effect.getAtom() != null &amp;&amp; effect.getAtom().getTitleText() != null ?</span>
+<span class="nc" id="L518">                        &quot; (&quot; + effect.getAtom().getTitleText() + &quot;)&quot; : &quot;&quot;;</span>
+<span class="nc bnc" id="L519" title="All 4 branches missed.">                String effectDescription = effect.getAtom() != null &amp;&amp; effect.getAtom().getDescription() != null ?</span>
+<span class="nc" id="L520">                        &quot;\n&quot; + indent + &quot;      Description: &quot; + effect.getAtom().getDescription() : &quot;&quot;;</span>
+
+<span class="nc" id="L522">                System.out.println(indent + &quot;    - &quot; + effect.getId() + effectTitleText +</span>
+<span class="nc" id="L523">                        &quot; (Probability: &quot; + effect.getProbability() +</span>
+<span class="nc" id="L524">                        &quot;, Satisfying: &quot; + effect.isSatisfying() + &quot;)&quot; + effectDescription);</span>
+
+                // Print effect pre formula if available
+<span class="nc" id="L527">                Formula effectPreFormula = effect.getPreFormula();</span>
+<span class="nc bnc" id="L528" title="All 2 branches missed.">                if (effectPreFormula != null) {</span>
+<span class="nc" id="L529">                    System.out.println(indent + &quot;      pre formula: &quot; + effectPreFormula.getFormula());</span>
+                }
+
+                // Print effect npr formula if available
+<span class="nc" id="L533">                Formula effectNprFormula = effect.getNprFormula();</span>
+<span class="nc bnc" id="L534" title="All 2 branches missed.">                if (effectNprFormula != null) {</span>
+<span class="nc" id="L535">                    System.out.println(indent + &quot;      npr formula: &quot; + effectNprFormula.getFormula());</span>
+                }
+
+                // Print turnsTrue and turnsFalse
+<span class="nc bnc" id="L539" title="All 4 branches missed.">                if (effect.getTurnsTrue() != null &amp;&amp; !effect.getTurnsTrue().isEmpty()) {</span>
+<span class="nc" id="L540">                    System.out.println(indent + &quot;      turns true: &quot; + String.join(&quot;, &quot;, effect.getTurnsTrue()));</span>
+                }
+
+<span class="nc bnc" id="L543" title="All 4 branches missed.">                if (effect.getTurnsFalse() != null &amp;&amp; !effect.getTurnsFalse().isEmpty()) {</span>
+<span class="nc" id="L544">                    System.out.println(indent + &quot;      turns false: &quot; + String.join(&quot;, &quot;, effect.getTurnsFalse()));</span>
+                }
+<span class="nc" id="L546">            }</span>
+        }
+<span class="nc" id="L548">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

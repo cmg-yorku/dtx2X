@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ReferenceResolver.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">dtx2X</a> &gt; <a href="index.source.html" class="el_package">ca.yorku.cmg.istardt.xmlparser.xml</a> &gt; <span class="el_source">ReferenceResolver.java</span></div><h1>ReferenceResolver.java</h1><pre class="source lang-java linenums">package ca.yorku.cmg.istardt.xmlparser.xml;
+
+import ca.yorku.cmg.istardt.xmlparser.objects.Element;
+import ca.yorku.cmg.istardt.xmlparser.xml.utils.CustomLogger;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * Reference resolver for managing object references during deserialization.
+ */
+public class ReferenceResolver {
+<span class="fc" id="L14">    private static final CustomLogger LOGGER = CustomLogger.getInstance();</span>
+<span class="fc" id="L15">    private static final ReferenceResolver INSTANCE = new ReferenceResolver();</span>
+
+    // Map of elements by ID for quick lookup
+<span class="fc" id="L18">    private final Map&lt;String, Element&gt; elementsById = new HashMap&lt;&gt;();</span>
+
+    // Map of elements by name (titleText) for content-based lookup
+<span class="fc" id="L21">    private final Map&lt;String, Element&gt; elementsByName = new HashMap&lt;&gt;();</span>
+
+    /**
+     * Private constructor for singleton pattern
+     */
+<span class="fc" id="L26">    private ReferenceResolver() {</span>
+<span class="fc" id="L27">    }</span>
+
+    /**
+     * Gets the singleton instance of the reference resolver.
+     *
+     * @return The shared ReferenceResolver instance
+     */
+    public static ReferenceResolver getInstance() {
+<span class="fc" id="L35">        return INSTANCE;</span>
+    }
+
+    /**
+     * Registers an element with its ID for later reference resolution.
+     * Also registers by name (titleText) if available for content-based resolution.
+     *
+     * @param id The unique identifier for the element
+     * @param element The element to register
+     */
+    public void registerElement(String id, Element element) {
+<span class="pc bpc" id="L46" title="2 of 4 branches missed.">        if (id != null &amp;&amp; element != null) {</span>
+<span class="fc" id="L47">            elementsById.put(id, element);</span>
+
+<span class="pc bpc" id="L49" title="2 of 4 branches missed.">            if (element.getAtom() != null &amp;&amp; element.getAtom().getTitleText() != null) {</span>
+<span class="fc" id="L50">                String name = element.getAtom().getTitleText();</span>
+<span class="fc" id="L51">                elementsByName.put(name, element);</span>
+            }
+        }
+<span class="fc" id="L54">    }</span>
+
+    /**
+     * Retrieves an element by its ID.
+     *
+     * @param id The unique identifier of the element to retrieve
+     * @return The element with the given ID, or null if not found
+     */
+    public Element getElementById(String id) {
+<span class="nc" id="L63">        Element element = elementsById.get(id);</span>
+<span class="nc bnc" id="L64" title="All 2 branches missed.">        if (element == null) {</span>
+<span class="nc" id="L65">            LOGGER.warning(getClass(), &quot;Element with ID '&quot; + id + &quot;' not found in reference resolver&quot;);</span>
+        }
+<span class="nc" id="L67">        return element;</span>
+    }
+
+    /**
+     * Retrieves an element by its name (titleText).
+     * This is useful for content-based resolution.
+     *
+     * @param name The name (titleText) of the element to retrieve
+     * @return The element with the given name, or null if not found
+     */
+    public Element getElementByName(String name) {
+<span class="fc" id="L78">        Element element = elementsByName.get(name);</span>
+<span class="pc bpc" id="L79" title="1 of 2 branches missed.">        if (element == null) {</span>
+<span class="nc" id="L80">            LOGGER.warning(getClass(),&quot;Element with name '&quot; + name + &quot;' not found in reference resolver&quot;);</span>
+        }
+<span class="fc" id="L82">        return element;</span>
+    }
+
+    /**
+     * Gets all element IDs registered in the resolver.
+     *
+     * @return A set of all element IDs
+     */
+    public Set&lt;String&gt; getAllElementIds() {
+<span class="nc" id="L91">        return elementsById.keySet();</span>
+    }
+
+    /**
+     * Clears all registered elements.
+     */
+    public void clear() {
+<span class="fc" id="L98">        elementsById.clear();</span>
+<span class="fc" id="L99">        elementsByName.clear();</span>
+<span class="fc" id="L100">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

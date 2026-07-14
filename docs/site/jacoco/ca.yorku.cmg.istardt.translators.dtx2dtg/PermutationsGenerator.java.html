@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PermutationsGenerator.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">dtx2X</a> &gt; <a href="index.source.html" class="el_package">ca.yorku.cmg.istardt.translators.dtx2dtg</a> &gt; <span class="el_source">PermutationsGenerator.java</span></div><h1>PermutationsGenerator.java</h1><pre class="source lang-java linenums">package ca.yorku.cmg.istardt.translators.dtx2dtg;
+
+import java.util.ArrayList;
+import java.util.List;
+
+<span class="fc" id="L6">public class PermutationsGenerator {</span>
+
+<span class="fc" id="L8">    private List&lt;String&gt; result = new ArrayList&lt;&gt;();</span>
+
+    public List&lt;String&gt; generatePermutations(ArrayList&lt;String&gt; input) {
+<span class="fc" id="L11">        permute(input, 0);</span>
+<span class="fc" id="L12">        return result;</span>
+    }
+
+    private void permute(List&lt;String&gt; list, int start) {
+<span class="fc bfc" id="L16" title="All 2 branches covered.">        if (start == list.size() - 1) {</span>
+<span class="fc" id="L17">            result.add(String.join(&quot; : &quot;, list));</span>
+<span class="fc" id="L18">            return;</span>
+        }
+
+<span class="fc bfc" id="L21" title="All 2 branches covered.">        for (int i = start; i &lt; list.size(); i++) {</span>
+<span class="fc" id="L22">            swap(list, start, i);</span>
+<span class="fc" id="L23">            permute(list, start + 1);</span>
+<span class="fc" id="L24">            swap(list, start, i); // backtrack</span>
+        }
+<span class="fc" id="L26">    }</span>
+
+    private void swap(List&lt;String&gt; list, int i, int j) {
+<span class="fc" id="L29">        String temp = list.get(i);</span>
+<span class="fc" id="L30">        list.set(i, list.get(j));</span>
+<span class="fc" id="L31">        list.set(j, temp);</span>
+<span class="fc" id="L32">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

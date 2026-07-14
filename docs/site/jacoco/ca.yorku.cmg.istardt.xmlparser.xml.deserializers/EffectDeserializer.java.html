@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EffectDeserializer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">dtx2X</a> &gt; <a href="index.source.html" class="el_package">ca.yorku.cmg.istardt.xmlparser.xml.deserializers</a> &gt; <span class="el_source">EffectDeserializer.java</span></div><h1>EffectDeserializer.java</h1><pre class="source lang-java linenums">package ca.yorku.cmg.istardt.xmlparser.xml.deserializers;
+
+import ca.yorku.cmg.istardt.xmlparser.objects.Effect;
+import ca.yorku.cmg.istardt.xmlparser.xml.utils.DeserializerUtils;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonNode;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.BiConsumer;
+
+public class EffectDeserializer extends BaseDeserializer&lt;Effect&gt; {
+    public EffectDeserializer() {
+<span class="fc" id="L17">        super(Effect.class);</span>
+<span class="fc" id="L18">    }</span>
+
+    @Override
+    protected Effect createNewElement() {
+<span class="fc" id="L22">        return new Effect();</span>
+    }
+
+    @Override
+    protected void handleSpecificAttributes(Effect effect, JsonNode node, JsonParser p, DeserializationContext ctxt) throws IOException {
+<span class="fc" id="L27">        boolean satisfying = DeserializerUtils.getBooleanAttribute(node, &quot;satisfying&quot;, true);</span>
+<span class="fc" id="L28">        float probability = DeserializerUtils.getFloatAttribute(node, &quot;probability&quot;, 1.0f);</span>
+<span class="fc" id="L29">        effect.setSatisfying(satisfying);</span>
+<span class="fc" id="L30">        effect.setProbability(probability);</span>
+
+<span class="fc bfc" id="L32" title="All 2 branches covered.">        if (node.has(&quot;pre&quot;)) {</span>
+<span class="fc" id="L33">            effect.setRawPreFormulaNode(node.get(&quot;pre&quot;));</span>
+        }
+<span class="pc bpc" id="L35" title="1 of 2 branches missed.">        if (node.has(&quot;npr&quot;)) {</span>
+<span class="nc" id="L36">            effect.setRawNprFormulaNode(node.get(&quot;npr&quot;));</span>
+        }
+
+        // Process string list properties for turnsTrue and turnsFalse
+<span class="fc" id="L40">        Map&lt;String, BiConsumer&lt;Effect, List&lt;String&gt;&gt;&gt; turnsSetter = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L41">        turnsSetter.put(&quot;turnsTrue&quot;, Effect::setTurnsTrue);</span>
+<span class="fc" id="L42">        turnsSetter.put(&quot;turnsFalse&quot;, Effect::setTurnsFalse);</span>
+        // Apply list-based properties
+<span class="fc bfc" id="L44" title="All 2 branches covered.">        for (Map.Entry&lt;String, BiConsumer&lt;Effect, List&lt;String&gt;&gt;&gt; entry : turnsSetter.entrySet()) {</span>
+<span class="fc" id="L45">            List&lt;String&gt; values = DeserializerUtils.getStringList(node, entry.getKey());</span>
+<span class="fc" id="L46">            entry.getValue().accept(effect, values);</span>
+<span class="fc" id="L47">        }</span>
+
+<span class="fc" id="L49">        Map&lt;String, Float&gt; variableMap = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L50">        JsonNode setsNode = node.get(&quot;set&quot;);</span>
+<span class="fc bfc" id="L51" title="All 2 branches covered.">        if (setsNode != null) {</span>
+<span class="pc bpc" id="L52" title="1 of 2 branches missed.">            if (setsNode.isArray()) {</span>
+<span class="fc bfc" id="L53" title="All 2 branches covered.">                for (JsonNode setElem : setsNode) {</span>
+<span class="fc" id="L54">                    String varId = setElem.path(&quot;variableID&quot;).asText();</span>
+<span class="fc" id="L55">                    float numConst = DeserializerUtils.getFloatAttribute(setElem, &quot;numConst&quot;, 0);</span>
+<span class="fc" id="L56">                    variableMap.put(varId, numConst);</span>
+<span class="fc" id="L57">                }</span>
+            } else {
+<span class="nc" id="L59">                String varId = setsNode.path(&quot;variableID&quot;).asText();</span>
+<span class="nc" id="L60">                float numConst = DeserializerUtils.getFloatAttribute(setsNode, &quot;numConst&quot;, 0);</span>
+<span class="nc" id="L61">                variableMap.put(varId, numConst);</span>
+            }
+        }
+<span class="fc" id="L64">        effect.setVariableNameSet(variableMap);</span>
+<span class="fc" id="L65">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

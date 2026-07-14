@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ReferenceProcessor.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">dtx2X</a> &gt; <a href="index.source.html" class="el_package">ca.yorku.cmg.istardt.xmlparser.xml.processing</a> &gt; <span class="el_source">ReferenceProcessor.java</span></div><h1>ReferenceProcessor.java</h1><pre class="source lang-java linenums">package ca.yorku.cmg.istardt.xmlparser.xml.processing;
+
+import ca.yorku.cmg.istardt.xmlparser.objects.*;
+import ca.yorku.cmg.istardt.xmlparser.xml.ReferenceResolver;
+import ca.yorku.cmg.istardt.xmlparser.xml.utils.CustomLogger;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Post-processor for resolving references after deserialization.
+ */
+public class ReferenceProcessor {
+<span class="fc" id="L18">    private static final CustomLogger LOGGER = CustomLogger.getInstance();</span>
+    private final XmlMapper xmlMapper;
+
+<span class="fc" id="L21">    public ReferenceProcessor(XmlMapper xmlMapper) {</span>
+<span class="fc" id="L22">        this.xmlMapper = xmlMapper;</span>
+<span class="fc" id="L23">    }</span>
+
+    /**
+     * Process the model to resolve all references between objects.
+     *
+     * @param model The model to process
+     */
+    public void processReferences(Model model) {
+<span class="pc bpc" id="L31" title="1 of 2 branches missed.">        if (model == null) {</span>
+<span class="nc" id="L32">            LOGGER.warning(getClass(),&quot;Cannot process references for null model&quot;);</span>
+<span class="nc" id="L33">            return;</span>
+        }
+        // Process each actor and its elements
+<span class="fc bfc" id="L36" title="All 2 branches covered.">        for (Actor actor : model.getActors()) {</span>
+            // Process goal hierarchies and refinements
+<span class="fc" id="L38">            processGoalRefinements(actor.getGoals());</span>
+
+            // Collect effects
+<span class="fc" id="L41">            List&lt;Effect&gt; allEffects = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L42" title="All 2 branches covered.">            for (Task task : actor.getTasks()) {</span>
+<span class="pc bpc" id="L43" title="1 of 2 branches missed.">                if (task.getEffects() != null) {</span>
+<span class="fc" id="L44">                    allEffects.addAll(task.getEffects());</span>
+                }
+<span class="fc" id="L46">            }</span>
+<span class="fc" id="L47">            actor.setEffects(allEffects);</span>
+
+            // Process parent-child relationships in decomposition elements
+<span class="fc" id="L50">            processDecompositionHierarchy(actor.getGoals());</span>
+
+<span class="fc" id="L52">            processCrossRunSets(actor);</span>
+<span class="fc" id="L53">            processExportedSet(actor);</span>
+<span class="fc" id="L54">            processInitializationSet(actor);</span>
+
+<span class="fc" id="L56">            processEffectSet(actor);</span>
+<span class="fc" id="L57">        }</span>
+<span class="fc" id="L58">        processAllFormulas(model);</span>
+<span class="fc" id="L59">        LOGGER.info(getClass(),&quot;Reference processing completed successfully&quot;);</span>
+<span class="fc" id="L60">    }</span>
+
+    private void processEffectSet(Actor actor) {
+<span class="fc" id="L63">        Map&lt;Variable, Float&gt; variableMap = new HashMap&lt;&gt;();</span>
+<span class="fc bfc" id="L64" title="All 2 branches covered.">        for (Effect effect : actor.getEffects()){</span>
+<span class="fc" id="L65">            Map&lt;String, Float&gt; variableNameSet = effect.getVariableNameSet();</span>
+<span class="fc bfc" id="L66" title="All 2 branches covered.">            for(String name: variableNameSet.keySet()){</span>
+<span class="fc" id="L67">                variableMap.put((Variable) ReferenceResolver.getInstance().getElementByName(name), variableNameSet.get(name));</span>
+<span class="fc" id="L68">            }</span>
+<span class="fc" id="L69">            effect.setVariableSet(variableMap);</span>
+<span class="fc" id="L70">        }</span>
+<span class="fc" id="L71">    }</span>
+
+    /**
+     * Process CrossRunSet references to resolve them to elements.
+     */
+    private void processCrossRunSets(Actor actor) {
+<span class="fc" id="L77">        CrossRunSet crossRunSet = actor.getCrossRunSet();</span>
+<span class="pc bpc" id="L78" title="2 of 4 branches missed.">        if (crossRunSet == null || crossRunSet.getRefs().isEmpty()) {</span>
+<span class="nc" id="L79">            return;</span>
+        }
+<span class="fc" id="L81">        LOGGER.info(getClass(),&quot;Processing CrossRunSet references&quot;);</span>
+<span class="fc bfc" id="L82" title="All 2 branches covered.">        for (String ref : crossRunSet.getRefs()) {</span>
+<span class="fc" id="L83">            Element element = ReferenceResolver.getInstance().getElementByName(ref);</span>
+<span class="pc bpc" id="L84" title="1 of 2 branches missed.">            if (element != null) {</span>
+<span class="fc" id="L85">                crossRunSet.addElement(element);</span>
+<span class="fc" id="L86">                LOGGER.info(getClass(), &quot;Resolved CrossRunSet reference: &quot; + ref + &quot; to element: &quot; + element.getClass().getSimpleName());</span>
+            } else {
+<span class="nc" id="L88">                LOGGER.warning(getClass(), &quot;Failed to resolve CrossRunSet reference: &quot; + ref);</span>
+            }
+<span class="fc" id="L90">        }</span>
+<span class="fc" id="L91">    }</span>
+
+
+    /**
+     * Process ExportedSet references to resolve them to elements.
+     */
+    private void processExportedSet(Actor actor) {
+<span class="fc" id="L98">        ExportedSet exportedSet = actor.getExportedSet();</span>
+<span class="pc bpc" id="L99" title="2 of 4 branches missed.">        if (exportedSet == null || exportedSet.getExports().isEmpty()) {</span>
+<span class="nc" id="L100">            return;</span>
+        }
+<span class="fc" id="L102">        LOGGER.info(getClass(), &quot;Processing ExportedSet references for actor: &quot; + actor.getId());</span>
+<span class="fc bfc" id="L103" title="All 2 branches covered.">        for (Export export : exportedSet.getExports()) {</span>
+<span class="fc" id="L104">            String ref = export.getRef();</span>
+<span class="fc" id="L105">            Element element = ReferenceResolver.getInstance().getElementByName(ref);</span>
+<span class="pc bpc" id="L106" title="1 of 2 branches missed.">            if (element != null) {</span>
+<span class="fc" id="L107">                export.setElement(element);</span>
+<span class="fc" id="L108">                LOGGER.info(getClass(),&quot;Resolved export reference: &quot; + ref + &quot; to element: &quot; + element.getId());</span>
+            } else {
+<span class="nc" id="L110">                LOGGER.warning(getClass(),&quot;Failed to resolve export reference: &quot; + ref);</span>
+            }
+<span class="fc" id="L112">        }</span>
+<span class="fc" id="L113">    }</span>
+
+    /**
+     * Process InitializationSet references to resolve them to elements.
+     */
+    private void processInitializationSet(Actor actor) {
+<span class="fc" id="L119">        InitializationSet initializationSet = actor.getInitializationSet();</span>
+<span class="pc bpc" id="L120" title="1 of 4 branches missed.">        if (initializationSet == null || initializationSet.getInitializations().isEmpty()) {</span>
+<span class="fc" id="L121">            return;</span>
+        }
+<span class="fc" id="L123">        LOGGER.info(getClass(),&quot;Processing InitializationSet references for actor: &quot; + actor.getId());</span>
+<span class="fc bfc" id="L124" title="All 2 branches covered.">        for (Initialization init : initializationSet.getInitializations()) {</span>
+<span class="fc" id="L125">            String ref = init.getRef();</span>
+<span class="fc" id="L126">            Element element = ReferenceResolver.getInstance().getElementByName(ref);</span>
+<span class="pc bpc" id="L127" title="1 of 2 branches missed.">            if (element != null) {</span>
+<span class="fc" id="L128">                init.setElement(element);</span>
+<span class="fc" id="L129">                LOGGER.info(getClass(),&quot;Resolved initialization reference: &quot; + ref +</span>
+<span class="fc" id="L130">                        &quot; to element: &quot; + element.getName() +</span>
+<span class="fc" id="L131">                        &quot; with value: &quot; + init.getValue());</span>
+            } else {
+<span class="nc" id="L133">                LOGGER.warning(getClass(),&quot;Failed to resolve initialization reference: &quot; + ref);</span>
+            }
+<span class="fc" id="L135">        }</span>
+<span class="fc" id="L136">    }</span>
+
+    /**
+     * Process goal refinements to establish parent-child relationships.
+     *
+     * @param goals The list of goals to process
+     */
+    private void processGoalRefinements(List&lt;Goal&gt; goals) {
+<span class="pc bpc" id="L144" title="1 of 2 branches missed.">        if (goals == null) return;</span>
+
+<span class="fc bfc" id="L146" title="All 2 branches covered.">        for (Goal goal : goals) {</span>
+            // Look for refinement ref
+<span class="fc" id="L148">            List&lt;String&gt; childGoalRefs = goal.getChildGoalRefs();</span>
+<span class="fc" id="L149">            List&lt;String&gt; childTaskRefs = goal.getChildTaskRefs();</span>
+
+            // Process child goal refs
+<span class="pc bpc" id="L152" title="1 of 2 branches missed.">            if (childGoalRefs != null) {</span>
+<span class="fc bfc" id="L153" title="All 2 branches covered.">                for (String ref : childGoalRefs) {</span>
+<span class="fc" id="L154">                    Element element = ReferenceResolver.getInstance().getElementByName(ref);</span>
+<span class="fc bfc" id="L155" title="All 2 branches covered.">                    if (element instanceof Goal) {</span>
+<span class="pc bpc" id="L156" title="1 of 2 branches missed.">                        if (goal.getDecompType() == DecompType.AND) {</span>
+<span class="fc" id="L157">                            goal.addANDChild((Goal) element);</span>
+<span class="nc bnc" id="L158" title="All 2 branches missed.">                        } else if (goal.getDecompType() == DecompType.OR) {</span>
+<span class="nc" id="L159">                            goal.addORChild((Goal) element);</span>
+                        }
+                    }
+<span class="fc" id="L162">                }</span>
+            }
+
+            // Process child task refs
+<span class="pc bpc" id="L166" title="1 of 2 branches missed.">            if (childTaskRefs != null) {</span>
+<span class="fc bfc" id="L167" title="All 2 branches covered.">                for (String ref : childTaskRefs) {</span>
+<span class="fc" id="L168">                    Element element = ReferenceResolver.getInstance().getElementByName(ref);</span>
+<span class="pc bpc" id="L169" title="1 of 2 branches missed.">                    if (element instanceof Task) {</span>
+<span class="pc bpc" id="L170" title="1 of 2 branches missed.">                        if (goal.getDecompType() == DecompType.AND) {</span>
+<span class="nc" id="L171">                            goal.addANDChild((Task) element);</span>
+<span class="pc bpc" id="L172" title="1 of 2 branches missed.">                        } else if (goal.getDecompType() == DecompType.OR) {</span>
+<span class="fc" id="L173">                            goal.addORChild((Task) element);</span>
+                        }
+                    }
+<span class="fc" id="L176">                }</span>
+            }
+<span class="fc" id="L178">        }</span>
+<span class="fc" id="L179">    }</span>
+
+    /**
+     * Process decomposition hierarchy to establish parent-child relationships
+     * between decomposition elements.
+     *
+     * @param goals The list of root goals to process
+     */
+    private void processDecompositionHierarchy(List&lt;Goal&gt; goals) {
+<span class="pc bpc" id="L188" title="1 of 2 branches missed.">        if (goals == null) return;</span>
+
+<span class="fc bfc" id="L190" title="All 2 branches covered.">        for (Goal goal : goals) {</span>
+<span class="pc bpc" id="L191" title="1 of 2 branches missed.">            if (goal.getChildren() != null) {</span>
+<span class="fc bfc" id="L192" title="All 2 branches covered.">                for (DecompositionElement child : goal.getChildren()) {</span>
+                    // Set parent-child relationships
+<span class="fc" id="L194">                    child.setParent(goal);</span>
+<span class="fc" id="L195">                }</span>
+            }
+<span class="fc" id="L197">        }</span>
+<span class="fc" id="L198">    }</span>
+
+    private void processAllFormulas(Model model) {
+<span class="fc" id="L201">        LOGGER.info(getClass(),&quot;Processing formulas...&quot;);</span>
+<span class="fc bfc" id="L202" title="All 2 branches covered.">        for (Actor actor : model.getActors()) {</span>
+            // Process goal formulas
+<span class="fc bfc" id="L204" title="All 2 branches covered.">            for (Goal goal : actor.getGoals()) {</span>
+<span class="fc" id="L205">                processElementFormulas(goal);</span>
+<span class="fc" id="L206">            }</span>
+
+            // Process task formulas
+<span class="fc bfc" id="L209" title="All 2 branches covered.">            for (Task task : actor.getTasks()) {</span>
+<span class="fc" id="L210">                processElementFormulas(task);</span>
+
+                // Process effect formulas
+<span class="fc bfc" id="L213" title="All 2 branches covered.">                for (Effect effect : task.getEffects()) {</span>
+<span class="fc" id="L214">                    processElementFormulas(effect);</span>
+<span class="fc" id="L215">                }</span>
+<span class="fc" id="L216">            }</span>
+
+            // Process quality formulas
+<span class="fc bfc" id="L219" title="All 2 branches covered.">            for (Quality quality : actor.getQualities()) {</span>
+<span class="pc bpc" id="L220" title="1 of 2 branches missed.">                if (quality.getRawFormulaNode() != null) {</span>
+<span class="fc" id="L221">                    Formula formula = deserializeFormula(quality.getRawFormulaNode());</span>
+<span class="pc bpc" id="L222" title="1 of 2 branches missed.">                    if (formula != null) {</span>
+<span class="fc" id="L223">                        quality.setFormula(formula);</span>
+<span class="fc" id="L224">                        LOGGER.info(getClass(),&quot;Set formula for quality: &quot; + quality.getId());</span>
+                    }
+                }
+<span class="fc" id="L227">            }</span>
+
+            // Process condition formulas
+<span class="fc bfc" id="L230" title="All 2 branches covered.">            for (Condition condition : actor.getConditions()) {</span>
+<span class="pc bpc" id="L231" title="1 of 2 branches missed.">                if (condition.getRawFormulaNode() != null) {</span>
+<span class="fc" id="L232">                    Formula formula = deserializeFormula(condition.getRawFormulaNode());</span>
+<span class="pc bpc" id="L233" title="1 of 2 branches missed.">                    if (formula != null) {</span>
+<span class="fc" id="L234">                        condition.setFormula(formula);</span>
+<span class="fc" id="L235">                        LOGGER.info(getClass(),&quot;Set formula for condition: &quot; + condition.getName());</span>
+                    }
+                }
+<span class="fc" id="L238">            }</span>
+<span class="fc" id="L239">        }</span>
+<span class="fc" id="L240">        LOGGER.info(getClass(),&quot;Formula processing completed&quot;);</span>
+<span class="fc" id="L241">    }</span>
+
+    /**
+     * Process pre and npr formulas for decomposition elements.
+     */
+    private void processElementFormulas(Object element) {
+<span class="fc" id="L247">        JsonNode preNode = null;</span>
+<span class="fc" id="L248">        JsonNode nprNode = null;</span>
+
+        // Extract raw formula nodes based on element type
+<span class="pc bpc" id="L251" title="1 of 2 branches missed.">        if (element instanceof DecompositionElement) {</span>
+<span class="fc" id="L252">            DecompositionElement decompElement = (DecompositionElement) element;</span>
+<span class="fc" id="L253">            preNode = decompElement.getRawPreFormulaNode();</span>
+<span class="fc" id="L254">            nprNode = decompElement.getRawNprFormulaNode();</span>
+        }
+
+        // Process pre formula
+<span class="fc bfc" id="L258" title="All 2 branches covered.">        if (preNode != null) {</span>
+<span class="fc" id="L259">            Formula preFormula = deserializeFormula(preNode);</span>
+<span class="pc bpc" id="L260" title="1 of 2 branches missed.">            if (preFormula != null) {</span>
+<span class="pc bpc" id="L261" title="1 of 2 branches missed.">                if (element instanceof DecompositionElement) {</span>
+<span class="fc" id="L262">                    ((DecompositionElement) element).setPreFormula(preFormula);</span>
+<span class="fc" id="L263">                    LOGGER.info(getClass(),&quot;Set pre formula for element: &quot; + ((DecompositionElement) element).getId());</span>
+                }
+            }
+        }
+
+        // Process npr formula
+<span class="fc bfc" id="L269" title="All 2 branches covered.">        if (nprNode != null) {</span>
+<span class="fc" id="L270">            Formula nprFormula = deserializeFormula(nprNode);</span>
+<span class="pc bpc" id="L271" title="1 of 2 branches missed.">            if (nprFormula != null) {</span>
+<span class="pc bpc" id="L272" title="1 of 2 branches missed.">                if (element instanceof DecompositionElement) {</span>
+<span class="fc" id="L273">                    ((DecompositionElement) element).setNprFormula(nprFormula);</span>
+<span class="fc" id="L274">                    LOGGER.info(getClass(),&quot;Set npr formula for element: &quot; + ((DecompositionElement) element).getId());</span>
+                }
+            }
+        }
+<span class="fc" id="L278">    }</span>
+
+
+    /**
+     * Deserialize a formula from a JSON node.
+     */
+    private Formula deserializeFormula(JsonNode node) {
+        try {
+<span class="fc" id="L286">            return xmlMapper.convertValue(node, Formula.class);</span>
+<span class="nc" id="L287">        } catch (Exception e) {</span>
+<span class="nc" id="L288">            LOGGER.error(getClass(),&quot;Error deserializing formula: &quot; + e.getMessage(), e);</span>
+<span class="nc" id="L289">            return null;</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Formatter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">dtx2X</a> &gt; <a href="index.source.html" class="el_package">ca.yorku.cmg.istardt.translators.dtx2dtg</a> &gt; <span class="el_source">Formatter.java</span></div><h1>Formatter.java</h1><pre class="source lang-java linenums">package ca.yorku.cmg.istardt.translators.dtx2dtg;
+
+<span class="fc" id="L3">public class Formatter {</span>
+
+	public String toCamelCase(String input) {
+<span class="pc bpc" id="L6" title="2 of 4 branches missed.">		if (input == null || input.isEmpty()) {</span>
+<span class="nc" id="L7">			return &quot;&quot;;</span>
+		}
+
+		// Keep only letters and digits, treat others as word separators
+<span class="fc" id="L11">		String[] parts = input.split(&quot;[^a-zA-Z0-9]+&quot;);</span>
+
+<span class="fc" id="L13">		StringBuilder sb = new StringBuilder();</span>
+
+<span class="fc bfc" id="L15" title="All 2 branches covered.">		for (int i = 0; i &lt; parts.length; i++) {</span>
+<span class="fc" id="L16">			String part = parts[i];</span>
+<span class="pc bpc" id="L17" title="1 of 2 branches missed.">			if (part.isEmpty()) continue;</span>
+
+<span class="pc bpc" id="L19" title="1 of 2 branches missed.">			if (i == 0) {</span>
+				// First word: lowercase first letter
+<span class="fc" id="L21">				sb.append(part.substring(0, 1).toLowerCase());</span>
+<span class="fc" id="L22">				sb.append(part.substring(1));</span>
+			} else {
+				// Other words: capitalize first letter
+<span class="nc" id="L25">				sb.append(part.substring(0, 1).toUpperCase());</span>
+<span class="nc" id="L26">				sb.append(part.substring(1));</span>
+			}
+		}
+
+		// Ensure first character is lowercase (required for Prolog atoms)
+<span class="pc bpc" id="L31" title="1 of 2 branches missed.">		if (sb.length() &gt; 0) {</span>
+<span class="fc" id="L32">			sb.setCharAt(0, Character.toLowerCase(sb.charAt(0)));</span>
+		}
+
+<span class="fc" id="L35">		return sb.toString();</span>
+	}
+
+	
+	public String trimTrailingCharacter(String s) {
+<span class="fc" id="L40">		return s.substring(0, s.length() - 1);</span>
+	}
+	
+	public String toFluent(String s) {
+<span class="fc" id="L44">		return s + &quot;_fl&quot;;</span>
+	}
+
+	public String toPreFluent(String s) {
+<span class="fc" id="L48">		return s + &quot;_fl_pre&quot;;</span>
+	}
+
+	
+	public String toSat(String s) {
+<span class="fc" id="L53">		return s + &quot;_Sat&quot;;</span>
+	}
+
+	public String toAtt(String s) {
+<span class="fc" id="L57">		return s + &quot;_Att&quot;;</span>
+	}
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

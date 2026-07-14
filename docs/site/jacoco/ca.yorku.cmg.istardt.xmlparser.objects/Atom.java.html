@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Atom.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">dtx2X</a> &gt; <a href="index.source.html" class="el_package">ca.yorku.cmg.istardt.xmlparser.objects</a> &gt; <span class="el_source">Atom.java</span></div><h1>Atom.java</h1><pre class="source lang-java linenums">package ca.yorku.cmg.istardt.xmlparser.objects;
+
+<span class="fc" id="L3">public class Atom extends Formula {</span>
+    private String id;
+    private String titleText;
+    private String titleHTMLText;
+    private String description;
+    private Element element;
+
+    /**
+     * Get the ID of this atom
+     */
+    public String getId() {
+<span class="nc" id="L14">        return id;</span>
+    }
+
+    /**
+     * Set the ID of this atom
+     */
+    public void setId(String id) {
+<span class="fc" id="L21">        this.id = id;</span>
+<span class="fc" id="L22">    }</span>
+
+    /**
+     * Get the title text of this atom
+     */
+    public String getTitleText() {
+<span class="fc" id="L28">        return titleText;</span>
+    }
+
+    /**
+     * Set the title text of this atom
+     */
+    public void setTitleText(String titleText) {
+<span class="fc" id="L35">        this.titleText = titleText;</span>
+<span class="fc" id="L36">    }</span>
+
+    /**
+     * Get the HTML title text of this atom
+     */
+    public String getTitleHTMLText() {
+<span class="fc" id="L42">        return titleHTMLText;</span>
+    }
+
+    /**
+     * Set the HTML title text of this atom
+     */
+    public void setTitleHTMLText(String titleHTMLText) {
+<span class="fc" id="L49">        this.titleHTMLText = titleHTMLText;</span>
+<span class="fc" id="L50">    }</span>
+
+    /**
+     * Get the description of this atom
+     */
+    public String getDescription() {
+<span class="fc" id="L56">        return description;</span>
+    }
+
+    /**
+     * Set the description of this atom
+     */
+    public void setDescription(String description) {
+<span class="fc" id="L63">        this.description = description;</span>
+<span class="fc" id="L64">    }</span>
+
+    @Override
+    public String getFormula() {
+<span class="fc" id="L68">        return titleText;</span>
+    }
+
+    public Element getElement() {
+<span class="fc" id="L72">        return element;</span>
+    }
+
+    public void setElement(Element element) {
+<span class="fc" id="L76">        this.element = element;</span>
+<span class="fc" id="L77">    }</span>
+
+    /**
+     * Get the string representation of this atom
+     */
+    public String getAtomRepresentation() {
+<span class="nc" id="L83">        return &quot;Atom{&quot; +</span>
+                &quot;id='&quot; + id + '\'' +
+                &quot;, titleText='&quot; + titleText + '\'' +
+                &quot;, titleHTMLText='&quot; + titleHTMLText + '\'' +
+                &quot;, description='&quot; + description + '\'' +
+                '}';
+    }
+
+    @Override
+    public String toString() {
+<span class="nc" id="L93">        return &quot;Atom{id=&quot; + id +</span>
+                &quot;, titleText=&quot; + titleText +
+                &quot;, titleHTMLText=&quot; + titleHTMLText +
+                &quot;, description=&quot; + description + &quot;}&quot;;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+<span class="pc bpc" id="L101" title="1 of 2 branches missed.">        if (this == o) return true;</span>
+<span class="pc bpc" id="L102" title="1 of 2 branches missed.">        if (!(o instanceof Atom atom)) return false;</span>
+
+<span class="pc bpc" id="L104" title="4 of 6 branches missed.">        if (getTitleText() != null ? !getTitleText().equals(atom.getTitleText()) : atom.getTitleText() != null)</span>
+<span class="fc" id="L105">            return false;</span>
+<span class="nc bnc" id="L106" title="All 6 branches missed.">        if (getTitleHTMLText() != null ? !getTitleHTMLText().equals(atom.getTitleHTMLText()) : atom.getTitleHTMLText() != null)</span>
+<span class="nc" id="L107">            return false;</span>
+<span class="nc bnc" id="L108" title="All 4 branches missed.">        return getDescription() != null ? getDescription().equals(atom.getDescription()) : atom.getDescription() == null;</span>
+    }
+
+    @Override
+    public int hashCode() {
+<span class="pc bpc" id="L113" title="1 of 2 branches missed.">        int result = getTitleText() != null ? getTitleText().hashCode() : 0;</span>
+<span class="pc bpc" id="L114" title="1 of 2 branches missed.">        result = 31 * result + (getTitleHTMLText() != null ? getTitleHTMLText().hashCode() : 0);</span>
+<span class="pc bpc" id="L115" title="1 of 2 branches missed.">        result = 31 * result + (getDescription() != null ? getDescription().hashCode() : 0);</span>
+<span class="fc" id="L116">        return result;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

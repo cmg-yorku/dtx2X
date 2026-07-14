@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Effect.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">dtx2X</a> &gt; <a href="index.source.html" class="el_package">ca.yorku.cmg.istardt.xmlparser.objects</a> &gt; <span class="el_source">Effect.java</span></div><h1>Effect.java</h1><pre class="source lang-java linenums">package ca.yorku.cmg.istardt.xmlparser.objects;
+
+import ca.yorku.cmg.istardt.xmlparser.xml.deserializers.EffectDeserializer;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+
+@JsonDeserialize(using = EffectDeserializer.class)
+public class Effect extends DecompositionElement {
+    private float probability;
+<span class="fc" id="L14">    private boolean satisfying = true;</span>
+    private List&lt;String&gt; turnsTrue;
+    private List&lt;String&gt; turnsFalse;
+    private Map&lt;Variable, Float&gt; variableSet;
+    private Map&lt;String, Float&gt; variableNameSet;
+    private Task task;
+
+<span class="fc" id="L21">    public Effect() {</span>
+<span class="fc" id="L22">        this.turnsTrue = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L23">        this.turnsFalse = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L24">        this.variableSet = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L25">        this.variableNameSet = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L26">        decompType = DecompType.TERM;</span>
+<span class="fc" id="L27">    }</span>
+
+    public boolean isSatisfying() {
+<span class="fc" id="L30">        return satisfying;</span>
+    }
+    public void setSatisfying(boolean satisfying) {
+<span class="fc" id="L33">        this.satisfying = satisfying;</span>
+<span class="fc" id="L34">    }</span>
+    public Task getTask() {
+<span class="nc" id="L36">        return task;</span>
+    }
+    @Override
+    public DecompositionElement getParent() {
+<span class="nc" id="L40">        return task;</span>
+    }
+    public void setTask(Task task) {
+<span class="fc" id="L43">        this.task = task;</span>
+<span class="fc" id="L44">    }</span>
+    public List&lt;String&gt; getTurnsTrue() {
+<span class="fc" id="L46">        return turnsTrue;</span>
+    }
+    public void setTurnsTrue(List&lt;String&gt; turnsTrue) {
+<span class="fc" id="L49">        this.turnsTrue = turnsTrue;</span>
+<span class="fc" id="L50">    }</span>
+    public List&lt;String&gt; getTurnsFalse() {
+<span class="fc" id="L52">        return turnsFalse;</span>
+    }
+    public void setTurnsFalse(List&lt;String&gt; turnsFalse) {
+<span class="fc" id="L55">        this.turnsFalse = turnsFalse;</span>
+<span class="fc" id="L56">    }</span>
+    public void addTurnsTrue(String element) {
+<span class="nc" id="L58">        turnsTrue.add(element);</span>
+<span class="nc" id="L59">    }</span>
+    public void addTurnsFalse(String element) {
+<span class="nc" id="L61">        turnsFalse.add(element);</span>
+<span class="nc" id="L62">    }</span>
+<span class="fc" id="L63">    public Map&lt;Variable, Float&gt; getVariableSet() {return variableSet;}</span>
+<span class="fc" id="L64">    public void setVariableSet(Map&lt;Variable, Float&gt; variableSet) {this.variableSet = variableSet;}</span>
+<span class="fc" id="L65">    public Map&lt;String, Float&gt; getVariableNameSet() {return variableNameSet;}</span>
+<span class="fc" id="L66">    public void setVariableNameSet(Map&lt;String, Float&gt; variableNameSet) {this.variableNameSet = variableNameSet;}</span>
+
+    /**
+     * Get the siblings of this effect (other effects from the same task).
+     *
+     * @return The list of sibling effects
+     */
+    @Override
+    public List&lt;DecompositionElement&gt; getSiblings() {
+<span class="nc bnc" id="L75" title="All 2 branches missed.">        if (task == null) {</span>
+<span class="nc" id="L76">            return new ArrayList&lt;&gt;();</span>
+        }
+
+<span class="nc" id="L79">        List&lt;DecompositionElement&gt; siblings = new ArrayList&lt;&gt;(task.getEffects());</span>
+<span class="nc" id="L80">        siblings.remove(this);</span>
+<span class="nc" id="L81">        return siblings;</span>
+    }
+
+    /**
+     * Check if this decompositionElement is a sibling of another effect.
+     *
+     * @param decompositionElement The DecompositionElement to check
+     * @return True if they are siblings, false otherwise
+     */
+    @Override
+    public boolean isSibling(DecompositionElement decompositionElement) {
+<span class="nc bnc" id="L92" title="All 6 branches missed.">        if (task == null || decompositionElement == null || decompositionElement.getParent() == null) {</span>
+<span class="nc" id="L93">            return false;</span>
+        }
+<span class="nc" id="L95">        return task.equals(decompositionElement.getParent());</span>
+    }
+
+    public float getProbability() {
+<span class="fc" id="L99">        return probability;</span>
+    }
+    public void setProbability(float probability) {
+<span class="fc" id="L102">        this.probability = probability;</span>
+<span class="fc" id="L103">    }</span>
+
+    @Override
+    public String toString() {
+<span class="nc" id="L107">        return &quot;Effect{id=&quot; + getId() +</span>
+                &quot;, probability=&quot; + probability +
+                &quot;, satisfying=&quot; + satisfying +
+<span class="nc bnc" id="L110" title="All 2 branches missed.">                &quot;, turnsTrueCount=&quot; + (turnsTrue != null ? turnsTrue.size() : 0) +</span>
+<span class="nc bnc" id="L111" title="All 2 branches missed.">                &quot;, turnsFalseCount=&quot; + (turnsFalse != null ? turnsFalse.size() : 0) ;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
