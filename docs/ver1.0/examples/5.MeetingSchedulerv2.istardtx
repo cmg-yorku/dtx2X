@@ -30,13 +30,103 @@
 <actor name="default" description="">
 
 
+
+<!--
+*** I N V A R I A N T S ***
+-->
+<invariants>
+	<!-- IF CONSTRAINTS ARE COLLECTED, EVENTULLY THE MEETING TIME MUST BE IDENTIFIED -->
+	<invariant>
+	<implies>
+		<goal name = "constraintsCollected">
+				<parameters>
+					<parameter>
+						<param-type>schedulingAssistant</param-type>
+						<param-name>sa</param-name>
+					</parameter>
+					<parameter>
+						<param-type>meeting</param-type>
+						<param-name>m</param-name>
+					</parameter>
+				</parameters>
+		</goal>
+	
+		<eventually>
+			<predicate name = "meetingTimeIdentified" description = "">
+				<parameters>
+				<parameter>
+					<param-type>schedulingAssistant</param-type>
+					<param-name>sa</param-name>
+				</parameter>
+				<parameter>
+					<param-type>meeting</param-type>
+					<param-name>m</param-name>
+				</parameter>
+				</parameters>
+			</predicate>
+		</eventually>
+	</invariant>
+</invariants>
+
+
+
+
+
 <!--
 *** G O A L S ***
 -->
 
-<!-- DISTINGUIS maintain, achieve, achieve and maintain, avoid -->
 <goals>
-   <goal name = "meetingOrganized" description = "Meeting Organized (sa,m)" root = "true" terminal = "false" episodeLength = "1">
+   <goal name = "avoidShutDown(sa)" 
+			description = "The agent must stay online so long as the meeting time has not been identified" 
+			root = "false" 
+			terminal = "true" 
+			mode = "avoid">
+		<parameters>
+			<parameter>
+				<param-type>schedulingAssistant</param-type>
+				<param-name>sa</param-name>
+			</parameter>
+		</parameters>
+		<goal-defn>
+			<!-- Maintain goal is active so long as identifyMeetingTime is not true for some meeting -->
+			<activation>
+				<neg>
+					<task name = "identifyMeetingTime">
+					<parameters>
+						<parameter>
+							<param-type>schedulingAssistant</param-type>
+							<param-name>sa</param-name>
+						</parameter>
+						<parameter>
+							<param-type>meeting</param-type>
+							<param-name>_</param-name>
+						</parameter>
+					</parameters>
+					</task>
+				</neg>
+			</activation>
+			<!-- The goal is for this to be true -->
+			<fulfillment>
+				<predicate name = "isOnline">
+					<parameters>
+						<parameter>
+							<param-type>schedulingAssistant</param-type>
+							<param-name>sa</param-name>
+						</parameter>
+					</parameters>
+				</predicate>
+			</fulfillment>
+		</goal-defn>
+	</goal>
+
+   <goal name = "meetingOrganized" 
+			description = "Meeting Organized (sa,m)" 
+			root = "true" 
+			terminal = "false" 
+			creation = "triggered"
+			mode = "achieve"
+			episodeLength = "1">
    
    	  <parameters>
 		<parameter>
@@ -50,8 +140,30 @@
 	  </parameters>
    
       <refinement type = "AND">
-         <childGoal ref = "constraintsCollectedSaM"/>
-         <childGoal ref = "identifyMeetingTimeSaM"/>
+		 <goal name = "constraintsCollected">
+		    <parameters>
+				<parameter>
+					<param-type>schedulingAssistant</param-type>
+					<param-name>sa</param-name>
+				</parameter>
+				<parameter>
+					<param-type>meeting</param-type>
+					<param-name>m</param-name>
+				</parameter>
+			</parameters>
+		</goal>
+		<task name = "identifyMeetingTime">
+			<parameters>
+				<parameter>
+					<param-type>schedulingAssistant</param-type>
+					<param-name>sa</param-name>
+				</parameter>
+				<parameter>
+					<param-type>meeting</param-type>
+					<param-name>m</param-name>
+				</parameter>
+			</parameters>
+		</task>
       </refinement>
    </goal>
    <goal name = "constraintsCollected" description = "Constraints Collected (sa,m)" root = "false" terminal = "false" episodeLength = "1">
@@ -68,8 +180,30 @@
 	  </parameters>
    
       <refinement type = "OR">
-         <childGoal ref = "constraintsCollectedByEmail"/>
-         <childGoal ref = "constraintsCollectedByPollingTool"/>
+			<goal name = "constraintsCollectedByEmail">
+			  <parameters>
+				<parameter>
+					<param-type>schedulingAssistant</param-type>
+					<param-name>sa</param-name>
+				</parameter>
+				<parameter>
+					<param-type>meeting</param-type>
+					<param-name>m</param-name>
+				</parameter>
+			  </parameters>
+			</goal>
+            <goal name = "constraintsCollectedByPollingTool">
+				<parameters>
+				<parameter>
+					<param-type>schedulingAssistant</param-type>
+					<param-name>sa</param-name>
+				</parameter>
+				<parameter>
+					<param-type>meeting</param-type>
+					<param-name>m</param-name>
+				</parameter>
+			  </parameters>
+			</goal>
       </refinement>
    </goal>
    
@@ -93,14 +227,34 @@
 					<param>p</param>
 				</params>
 				<condition>
-					<!-- THIS SOULD BE A PREDICATE REFERENCE -->
-					<content>potientialParticipant(p)</content>
+					<predicate name = 'potentialParticipant'>
+						<parameters>
+							<parameter>
+								<param-type>participant<param-type>
+								<param-name>p<param-name>
+							</parameter>
+						</parameters>
+					</predicate>
 				</condition>
 			</forall>
 		</ref-condition>
-        <childGoal ref = "collectIndividualConstraintsByEmail"/>
+        <task name = "collectIndividualConstraintsByEmail">
+		  <parameters>
+			<parameter>
+				<param-type>schedulingAssistant</param-type>
+				<param-name>sa</param-name>
+			</parameter>
+			<parameter>
+				<param-type>potentialParticipant</param-type>
+				<param-name>p</param-name>
+			</parameter>
+			<parameter>
+				<param-type>meeting</param-type>
+				<param-name>m</param-name>
+			</parameter>
+		  </parameters>
+		</task>
       </refinement>
-	  
    </goal>
    
    <goal name = "constraintsCollectedByPollingTool" description = "Constraints Collected By Polling Tool (sa,m)" root = "false" terminal = "false" episodeLength = "1">
@@ -122,12 +276,33 @@
 					<param>t</param>
 				</params>
 				<condition>
-					<!-- THIS SOULD BE A PREDICATE REFERENCE -->
-					<content>pollTool(t)</content>
+					<predicate name = 'pollTool'>
+						<parameters>
+							<parameter>
+								<param-type>pollTool<param-type>
+								<param-name>t<param-name>
+							</parameter>
+						</parameters>
+					</predicate>
 				</condition>
 			</pick>
 		</ref-condition>
-         <childTask ref = "collectIndividualConstraintsFromPollingTool"/>
+        <task name = "collectIndividualConstraintsFromPollingTool">
+		  <parameters>
+			<parameter>
+				<param-type>schedulingAssistant</param-type>
+				<param-name>sa</param-name>
+			</parameter>
+			<parameter>
+				<param-type>pollingTool</param-type>
+				<param-name>t</param-name>
+			</parameter>
+			<parameter>
+				<param-type>meeting</param-type>
+				<param-name>m</param-name>
+			</parameter>
+		  </parameters>
+		</task>
       </refinement>
    </goal>
 </goals>
@@ -155,11 +330,44 @@
       <effectGroup>
          <effect name = "individualConstraintsByEmailCollected_Eff" description = "individualConstraintsByEmailCollected(sa, p, m)" satisfying = "true" probability = "0.95">
 		 	<!-- THIS SOULD BE A PREDICATE REFERENCE -->
-            <turnsTrue>individualConstraintsByEmailCollected</turnsTrue>
+            <turnsTrue>
+			   <predicate name = "individualConstraintsByEmailCollected">
+					<parameters>
+					<parameter>
+						<param-type>schedulingAssistant</param-type>
+						<param-name>sa</param-name>
+					</parameter>
+					<parameter>
+						<param-type>potentialParticipant</param-type>
+						<param-name>p</param-name>
+					</parameter>
+					<parameter>
+						<param-type>meeting</param-type>
+						<param-name>m</param-name>
+					</parameter>
+				  </parameters>
+			   </predicate>
+			</turnsTrue>
          </effect>
          <effect name = "individualConstraintsByEmailFailed_Eff" description = "individualConstraintsByEmailFailed(sa, p, m)" satisfying = "false" probability = "0.05">
-			<!-- THIS SOULD BE A PREDICATE REFERENCE -->
-            <turnsTrue>individualConstraintsByEmailFailed</turnsTrue>
+            <turnsTrue>
+				<predicate name = "individualConstraintsByEmailFailed">
+					<parameters>
+					<parameter>
+						<param-type>schedulingAssistant</param-type>
+						<param-name>sa</param-name>
+					</parameter>
+					<parameter>
+						<param-type>potentialParticipant</param-type>
+						<param-name>p</param-name>
+					</parameter>
+					<parameter>
+						<param-type>meeting</param-type>
+						<param-name>m</param-name>
+					</parameter>
+				  </parameters>
+			   </predicate>
+			</turnsTrue>
          </effect>
       </effectGroup>
    </task>
@@ -177,12 +385,37 @@
    
       <effectGroup>
          <effect name = "meetingTimeIdentified_Eff" description = "meetingTimeIdentified(sa,m)" satisfying = "true" probability = "0.99">
-			<!-- THIS SOULD BE A PREDICATE REFERENCE -->
-            <turnsTrue>meetingTimeIdentified</turnsTrue>
+            <turnsTrue>   
+				<predicate name = "meetingTimeIdentified">
+					<parameters>
+					<parameter>
+						<param-type>schedulingAssistant</param-type>
+						<param-name>sa</param-name>
+					</parameter>
+					<parameter>
+						<param-type>meeting</param-type>
+						<param-name>m</param-name>
+					</parameter>
+					</parameters>
+			   </predicate>
+			</turnsTrue>
          </effect>
          <effect name = "meetingTimeIdentifiedFail_Eff" description = "meetingTimeIdentifiedFail(sa,m)" satisfying = "false" probability = "0.01">
-			<!-- THIS SOULD BE A PREDICATE REFERENCE -->
-            <turnsTrue>meetingTimeIdentifiedFail</turnsTrue>
+			<turnsTrue>   
+				<predicate name = "meetingTimeIdentifiedFail">
+					<parameters>
+					<parameter>
+						<param-type>schedulingAssistant</param-type>
+						<param-name>sa</param-name>
+					</parameter>
+					<parameter>
+						<param-type>meeting</param-type>
+						<param-name>m</param-name>
+					</parameter>
+					</parameters>
+			   </predicate>
+			</turnsTrue>
+
          </effect>
       </effectGroup>
       <pre>
@@ -206,13 +439,47 @@
 	  </parameters>
    
       <effectGroup>
-         <effect name = "individualConstraintsByPollingToolCollected_Eff" description = "individualConstraintsByPollingToolCollected(sa, p, m)" satisfying = "true" probability = "0.95">
+         <effect name = "individualConstraintsByPollingToolCollected_Eff" description = "individualConstraintsByPollingToolCollected(sa, t, m)" satisfying = "true" probability = "0.95">
 			<!-- THIS SOULD BE A PREDICATE REFERENCE -->
-            <turnsTrue>individualConstraintsByPollingToolCollected</turnsTrue>
+            <turnsTrue>
+			   <predicate name = "individualConstraintsByPollingToolCollected">
+					<parameters>
+					<parameter>
+						<param-type>schedulingAssistant</param-type>
+						<param-name>sa</param-name>
+					</parameter>
+					<parameter>
+						<param-type>pollingTool</param-type>
+						<param-name>t</param-name>
+					</parameter>
+					<parameter>
+						<param-type>meeting</param-type>
+						<param-name>m</param-name>
+					</parameter>
+				  </parameters>
+				</predicate>
+			</turnsTrue>
          </effect>
-         <effect name = "individualConstraintsByPollingToolFailed_Eff" description = "individualConstraintsByPollingToolCollected(sa, p, m)" satisfying = "false" probability = "0.05">
-			<!-- THIS SOULD BE A PREDICATE REFERENCE -->
-            <turnsTrue>individualConstraintsByPollingToolCollected</turnsTrue>
+         <effect name = "individualConstraintsByPollingToolFailed_Eff" description = "individualConstraintsByPollingToolFailed_Eff(sa, p, m)" satisfying = "false" probability = "0.05">
+            <turnsTrue>
+				<predicate name = "individualConstraintsByPollingToolFailed">
+					<parameters>
+					<parameter>
+						<param-type>schedulingAssistant</param-type>
+						<param-name>sa</param-name>
+					</parameter>
+					<parameter>
+						<param-type>pollingTool</param-type>
+						<param-name>t</param-name>
+					</parameter>
+					<parameter>
+						<param-type>meeting</param-type>
+						<param-name>m</param-name>
+					</parameter>
+				  </parameters>
+				</predicate>
+			
+			</turnsTrue>
          </effect>
       </effectGroup>
    </task>
@@ -278,6 +545,24 @@
 	  </parameters>
 	</predicate>
 	
+	<predicate name = "individualConstraintsByPollingToolFailed" description = "">
+		<parameters>
+		<parameter>
+			<param-type>schedulingAssistant</param-type>
+			<param-name>sa</param-name>
+		</parameter>
+		<parameter>
+			<param-type>pollingTool</param-type>
+			<param-name>t</param-name>
+		</parameter>
+		<parameter>
+			<param-type>meeting</param-type>
+			<param-name>m</param-name>
+		</parameter>
+	  </parameters>
+	</predicate>
+	
+	
    <predicate name = "individualConstraintsByEmailCollected" description = "">
 		<parameters>
 		<parameter>
@@ -293,7 +578,6 @@
 			<param-name>m</param-name>
 		</parameter>
 	  </parameters>
-   
    </predicate>
    <predicate name = "meetingTimeIdentifiedFail" description = "">
 		<parameters>
@@ -339,6 +623,16 @@
 		</parameter>
 		</parameters>
    </predicate>
+   
+    <predicate name = "isOnline" description = "isOnline(sa)">
+		<parameters>
+			<parameter>
+				<param-type>schedulingAssistant</param-type>
+				<param-name>sa</param-name>
+			</parameter>
+		</parameters>
+	</predicate>
+
 </predicates>
 
 

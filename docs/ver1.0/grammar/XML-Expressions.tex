@@ -27,7 +27,6 @@
 \textbf{[boolean]} \> ::= "true" | "false" \\
 \textbf{[decimal]} \> ::= \textbf{[digit]}+ [ "." \textbf{[digit]}+ ]\\
 \textbf{[integer]} \> ::= \textbf{[digit]}+ \\
-\red{{}[del-style]} \> \red{::= `sync' | `async'} \\
 \end{tabbing}
 \end{scriptsize}
 
@@ -46,7 +45,7 @@
 
 
 
-\textbf{[boolean-expression]} \> ::= \> \textbf{[bool-const]} | \textbf{[atom]} | \textbf{[previous-bool]} | \\
+\textbf{[boolean-expression]} \> ::= \> [bool-const] | [atom] | [numeric-comparison] | [boolean-operation]\\
 \textbf{[bool-const]} \> ::= "<boolConst>" \textbf{[boolean]} "</boolConst>" \\
 \textbf{[atom]} \> ::= \> [predicate-ref] | \sout{[condition-id] |} \\ 
 \> \> [goal-ref] | [task-ref] \sout{| [effect-id]}\\
@@ -56,11 +55,13 @@
 \sout{\textbf{[effect-id]}} \> \sout{::= "<effectID>" \textbf{[identifier]} "</effectID>"} \\
 \sout{\textbf{[goal-id]}} \> \sout{::= "<goalID>" \textbf{[identifier]} "</goalID>"} \\
 \sout{\textbf{[task-id]}} \> \sout{::= "<taskID>" \textbf{[identifier]} "</taskID>"} \\
-\textbf{[previous-bool]} \> ::= "<previous>" \textbf{[atom] "</previous>"} \\
-\textbf{[boolean-operation]} \> ::= \> \textbf{[and]} | \textbf{[or]} | \textbf{[not]}\\
+\textbf{[boolean-operation]} \> ::= \> \textbf{[and]} | \textbf{[or]} | \textbf{[not]} |  \textbf{[prev]}\\
 \textbf{[and]} \> ::= \> "<and>" \textbf{[boolean-expression] [boolean-expression]+} "</and>"\\
 \textbf{[or]}  \> ::=  \> "<or>" \textbf{[boolean-expression] [boolean-expression]+} "</or>"\\
 \textbf{[not]} \> ::= \> "<not>" \textbf{[boolean-expression]} "</not>"\\
+\red{[implies]}  \> ::=  \> \red{"<implies>" [boolean-expression] [boolean-expression] "</implies>"}\\
+
+\textbf{[prev]} \> ::= "<previous>" \textbf{[atom] "</previous>"} \\
 \textbf{[comparison-op]} \> ::= \> "gt" | "gte" | "lt" | "lte" | "eq" | "neq"\\
 \textbf{[numeric-comparison]} \> ::= \> "<" \textbf{[comparison-op]} ">" \\ 
      \> \> "<left>" \textbf{[numeric-expression]} "</left>"  \\ 
@@ -104,14 +105,32 @@
 \textbf{\red{Parameters}}
 \end{footnotesize}
 \ttfamily
-
+\vspace{-3mm}
 \begin{scriptsize}
 \begin{tabbing}
 \red{[+++++++++++]}\= \red{::= "<parameters>" \textbf{[parameter]} "</parameters>"}\kill
-\red{[parameters]}\> \red{::= "<parameters>" \textbf{[parameter]} "</parameters>"}\\
+\red{[parameters]}\> \red{::= "<parameters>" [parameter]+ "</parameters>"}\\
 \red{[parameter]} \> \red{::= "<parameter>" [param-type] [param-name] "</parameter>"}\\ 
 \red{[param-type]} \> \red{::= "<param-type>" [identifier] "</param-type>"}\\ 
 \red{[param-name]} \> \red{::= "<param-name>" [identifier] "</param-name>"}\\ 
+\end{tabbing}
+\end{scriptsize}
+
+
+\rmfamily
+\begin{footnotesize}
+\textbf{\red{Temporal Folumae}}
+\end{footnotesize}
+\ttfamily
+\vspace{-3mm}
+\begin{scriptsize}
+\begin{tabbing}
+\red{[+++++++++++++++++]}\= \red{::= "<parameters>" \textbf{[parameter]} "</parameters>"}\kill
+\red{[temporal-formula]}\> \red{::= [boolean-expression]}\\
+\red{[temporal-formula]} \> \red{::= "<always>" [temp-form] "</always>"}\\ 
+\red{[temporal-formula]} \> \red{::= "<eventually>" [temp-form] "</eventually>"}\\ 
+\red{[temporal-formula]} \> \red{::= "<next>" [temp-form] "</next>"}\\ 
+\red{[temporal-formula]} \> \red{::= "<until>" [temp-form] [temp-form] "</until>"}\\ 
 \end{tabbing}
 \end{scriptsize}
 

@@ -70,7 +70,7 @@
 \textbf{[exported-set]} \> ::= "<exportedSet>" \textbf{[export]}+ "</exportedSet>" \\
 \textbf{[export]} \> ::= "<export continuous=" [boolean] [ "minVal=" [decimal]] \\\>\> [" maxVal=" [decimal] ] ">"  \textbf{[exp-id]} "</export>" \\
 \textbf{[exp-id]} \> ::= [goal-id] | [task-id] | [predicate-id] | [variable-id] | [qual-id] \\
-\textbf{[initializations]}\> ::= "<initializations> " \textbf{[initialization]} "</initialization>" \\
+\textbf{[initializations]}\> ::= "<initializations> " \textbf{[initialization]} "</initializations>" \\
 
 \textbf{[initialization]} \> ::= [b-init] | [d-init] \\
 \textbf{[b-init]} \> ::= "<initialization element=" \textbf{[predicate-id]} "> " \\\>\> \textbf{[boolean]} "</initialization>" \\
@@ -81,8 +81,23 @@
 \red{\textbf{[definition]}}\> \red{::= "<definition>" \textbf{[definiendum] [definiens]} "</definition>"} \\
 \red{[definiendum]} \> \red{::= "<definiendum name = `" [identifier] "'>"} \\ 
 \>\> \red{[ [parameters] ] "</definiendum>"} \\
-\red{\textbf{[defiens]}}\> \red{::= "<definiens>" [boolean-expression] "</definiens>"} \\
+\red{\textbf{[definiens]}}\> \red{::= "<definiens>" [boolean-expression] "</definiens>"} \\
 \end{tabbing}
+\end{scriptsize}
+\rmfamily
+
+\begin{footnotesize}
+\textbf{Invariants}
+\end{footnotesize}
+\ttfamily
+\vspace{-3mm}
+\begin{scriptsize}
+\begin{tabbing}
+{}[invariants] \= ::= \= \kill
+\red{{}[invariants]} \> ::= \red{"<invariants>" [invariant] "</invariants>"}\\
+\red{{}[invariant]} \> ::= \red{"<invariant>" [temporal-formula] "</invariant>"}\\
+\end{tabbing}
+
 \end{scriptsize}
 
 \rmfamily
