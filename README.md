@@ -35,30 +35,13 @@ Currently a translator to DT-Golog, `dtx2dtg`, is included.
 
 1. Clone the repository
 2. Enter the project folder
-3. Make a copy of `settingsExample.xml` and rename the copy to `settings.xml`
-4. In `settings.xml`, add in your GitHub username and personal access token (classic) with `read:packages` scope
-```xml
-<servers>
-  <server>
-    <id>github</id>
-    <username>GITHUB_USERNAME</username>
-    <password>GITHUB_PERSONAL_ACCESS_TOKEN</password>
-  </server>
-</servers>
-```
-
-To make a personal access token (classic) on GitHub: Settings > Developer Settings > Personal access tokens > Tokens (classic) > Generate new token
-![img.png](docs/images/generate_token.png)
-![img.png](docs/images/personal_access_token.png)
-https://docs.github.com/en/packages/learn-github-packages/about-permissions-for-github-packages#visibility-and-access-permissions-for-packages
-> In most registries, to pull a package, you must authenticate with a personal access token or GITHUB_TOKEN, regardless of whether the package is public or private.
-
-> To download and install packages from a repository, your personal access token (classic) must have the read:packages scope, and your user account must have read permission.
-5. Install the project’s artifacts into your local Maven repository using your custom authentication settings:
+3. Install the project artifacts into your local Maven repository:
 
 ```bash
-mvn clean install -s settings.xml
+mvn clean install
 ```
+
+No GitHub Packages token or custom Maven settings are required for `xml-validation`; it is published on Maven Central.
 
 <!-- 
 6. To run the main application (IStarTApplication), run:
@@ -136,7 +119,6 @@ public class IStarTApplication {
 .
 ├── README.md
 ├── pom.xml
-├── settingsExample.xml
 ├── .gitignore
 ├── docs
    ├── README.md
@@ -211,7 +193,7 @@ Configuration is handled through the Maven POM file. The main configurable eleme
 
 - Java version (currently set to Java 17)
 - Jackson dependencies
-- [XML validation library](https://github.com/nina2dv/xml-validation)
+- XML validation library: [io.github.nina2dv:xml-validation:1.1.0](https://central.sonatype.com/artifact/io.github.nina2dv/xml-validation/1.1.0)
 
 ## Testing
 
