@@ -1,0 +1,129 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/28.0.6 Chrome/138.0.7204.100 Electron/37.2.3 Safari/537.36" compressed="false">
+  <diagram id="wCoHQSZFB8IqTMeHY3nc" name="Pattern">
+    <mxGraphModel dx="4046" dy="2698" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="pAowDUD0oEhH17143uuC-9" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#3333FF;align=center;verticalAlign=bottom;labelPosition=center;verticalLabelPosition=top;fontStyle=1" value="Scheduling Agent" vertex="1">
+          <mxGeometry height="260" width="260" x="300" as="geometry" />
+        </mxCell>
+        <mxCell id="pAowDUD0oEhH17143uuC-8" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#3333FF;align=center;verticalAlign=bottom;labelPosition=center;verticalLabelPosition=top;fontStyle=1" value="Polling Agent" vertex="1">
+          <mxGeometry height="260" width="260" x="600" y="310" as="geometry" />
+        </mxCell>
+        <mxCell id="pAowDUD0oEhH17143uuC-7" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#3333FF;align=center;verticalAlign=bottom;labelPosition=center;verticalLabelPosition=top;fontStyle=1" value="Communication Agent" vertex="1">
+          <mxGeometry height="260" width="320" x="-170" y="240" as="geometry" />
+        </mxCell>
+        <object label="Meeting Scheduled (sa,m)" concept="goal" actor="default" runs="1" id="pAowDUD0oEhH17143uuC-1">
+          <mxCell parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=46;fillColor=#d5e8d4;strokeColor=#688F51;fontSize=15;strokeWidth=3;" vertex="1">
+            <mxGeometry height="50" width="130" x="380" y="50" as="geometry" />
+          </mxCell>
+        </object>
+        <object label="pick(ca).communicationAgent(ca)" concept="orDecomp" id="pAowDUD0oEhH17143uuC-2">
+          <mxCell edge="1" parent="1" source="pAowDUD0oEhH17143uuC-3" style="orthogonalLoop=1;jettySize=auto;html=1;fontSize=15;endArrow=open;endFill=0;endSize=17;strokeColor=#000000;curved=1;rounded=0;" target="pAowDUD0oEhH17143uuC-11">
+            <mxGeometry relative="1" x="-0.0468" y="9" as="geometry">
+              <mxPoint as="offset" />
+              <Array as="points">
+                <mxPoint x="280" y="280" />
+              </Array>
+              <mxPoint x="260" y="270" as="sourcePoint" />
+              <mxPoint x="200" y="120" as="targetPoint" />
+            </mxGeometry>
+          </mxCell>
+        </object>
+        <object label="Constraints Gathered by Email (ca, sa,m)" concept="goal" actor="default" runs="1" act-style="called" id="pAowDUD0oEhH17143uuC-3">
+          <mxCell parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=46;fillColor=#d5e8d4;strokeColor=#688F51;fontSize=15;strokeWidth=3;" vertex="1">
+            <mxGeometry height="50" width="150" x="-90" y="290" as="geometry" />
+          </mxCell>
+        </object>
+        <object label="Gather Constraints by Polling Tool (pa,sa,m)" concept="goal" actor="default" runs="1" act-style="triggered" id="pAowDUD0oEhH17143uuC-4">
+          <mxCell parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=46;fillColor=#d5e8d4;strokeColor=#688F51;fontSize=15;strokeWidth=3;" vertex="1">
+            <mxGeometry height="50" width="170" x="630" y="380" as="geometry" />
+          </mxCell>
+        </object>
+        <object label="pick(ca).pollingAgent(pa)" concept="orDecomp" id="pAowDUD0oEhH17143uuC-5">
+          <mxCell edge="1" parent="1" source="pAowDUD0oEhH17143uuC-4" style="orthogonalLoop=1;jettySize=auto;html=1;fontSize=15;endArrow=open;endFill=0;endSize=17;strokeColor=#000000;curved=1;rounded=0;" target="pAowDUD0oEhH17143uuC-12">
+            <mxGeometry relative="1" x="-0.1355" y="-21" as="geometry">
+              <mxPoint as="offset" />
+              <Array as="points">
+                <mxPoint x="460" y="310" />
+              </Array>
+              <mxPoint x="236" y="300" as="sourcePoint" />
+              <mxPoint x="770" y="100" as="targetPoint" />
+            </mxGeometry>
+          </mxCell>
+        </object>
+        <mxCell id="pAowDUD0oEhH17143uuC-10" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Lucida Console;align=left;verticalAlign=top;" value="&lt;div&gt;% COMMUNICATION AGENT&lt;/div&gt;&lt;div&gt;% Normal procedure call. In iStar-DT-X activation style was marked as &#39;called&#39;&lt;/div&gt;&lt;div&gt;proc(constraintsGatheredByEmail(CA,SA,M), gatherConstraintsByEmail(CA,SA,M)).&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;prim_action(gatherConstraintsByEmail(_,_,_)).&lt;/div&gt;&lt;div&gt;poss(gatherConstraintsByEmail(_,_,_),true).&lt;/div&gt;&lt;div&gt;initially(gatherConstraintsByEmail_Sat(_,_,_),false).&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;causes_val(gatherConstraintsByEmail(CA,SA,M),&amp;nbsp;&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp;gatherConstraintsByEmail_Sat(CA,SA,M), true, true).&lt;/div&gt;&lt;div&gt;prim_fluent(gatherConstraintsByEmail_Sat(_,_,_)).&lt;/div&gt;" vertex="1">
+          <mxGeometry height="180" width="570" x="-190" y="570" as="geometry" />
+        </mxCell>
+        <object label="Constraints Gathered by Email (sa,m)" concept="goal" actor="default" runs="1" id="pAowDUD0oEhH17143uuC-11">
+          <mxCell parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=46;fillColor=#d5e8d4;strokeColor=#688F51;fontSize=15;strokeWidth=3;" vertex="1">
+            <mxGeometry height="50" width="130" x="270" y="160" as="geometry" />
+          </mxCell>
+        </object>
+        <object label="Constraints Gathered by Polling Tool (sa,m)" concept="goal" actor="default" runs="1" id="pAowDUD0oEhH17143uuC-12">
+          <mxCell parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=46;fillColor=#d5e8d4;strokeColor=#688F51;fontSize=15;strokeWidth=3;" vertex="1">
+            <mxGeometry height="50" width="160" x="425" y="180" as="geometry" />
+          </mxCell>
+        </object>
+        <object label="OR" concept="orDecomp" id="pAowDUD0oEhH17143uuC-13">
+          <mxCell edge="1" parent="1" source="pAowDUD0oEhH17143uuC-11" style="orthogonalLoop=1;jettySize=auto;html=1;fontSize=20;endArrow=open;endFill=0;endSize=17;strokeColor=#000000;curved=1;rounded=0;labelBackgroundColor=none;" target="pAowDUD0oEhH17143uuC-1">
+            <mxGeometry relative="1" x="0.0383" y="2" as="geometry">
+              <mxPoint as="offset" />
+              <mxPoint x="230" y="310" as="sourcePoint" />
+              <mxPoint x="230" y="250" as="targetPoint" />
+            </mxGeometry>
+          </mxCell>
+        </object>
+        <object label="OR" concept="orDecomp" id="pAowDUD0oEhH17143uuC-14">
+          <mxCell edge="1" parent="1" source="pAowDUD0oEhH17143uuC-12" style="orthogonalLoop=1;jettySize=auto;html=1;fontSize=20;endArrow=open;endFill=0;endSize=17;strokeColor=#000000;curved=1;rounded=0;labelBackgroundColor=none;" target="pAowDUD0oEhH17143uuC-1">
+            <mxGeometry relative="1" x="0.0383" y="2" as="geometry">
+              <mxPoint as="offset" />
+              <mxPoint x="383" y="150" as="sourcePoint" />
+              <mxPoint x="427" y="110" as="targetPoint" />
+            </mxGeometry>
+          </mxCell>
+        </object>
+        <mxCell id="pAowDUD0oEhH17143uuC-15" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Lucida Console;align=left;verticalAlign=top;" value="&lt;div&gt;&lt;div&gt;% POLLING AGENT&lt;/div&gt;&lt;div&gt;% Message based trigger. In iStar-DT-X activation style was marked as &#39;triggered&#39;&lt;/div&gt;&lt;div&gt;% Agent needs a server if there is at least one triggered goal. The goal is added&amp;nbsp;&lt;/div&gt;&lt;div&gt;% without parameters. Parameters will come from the exogenous event.&lt;/div&gt;&lt;div&gt;proc(paMain,iconc(constraintsGatheredByPollingTool)).&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;% The exogenous action that triggers the goal, by turning the [action_name]_Sat fluent true.&lt;/div&gt;&lt;div&gt;exog_action(constraintsGatheredByPoll_Request_Receive(_,_,_)).&lt;/div&gt;&lt;div&gt;causes_val(constraintsGatheredByPoll_Request_Receive(PA,SA,M),&amp;nbsp;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;white-space: normal;&quot;&gt;&lt;span style=&quot;white-space:pre&quot;&gt;&#x9;&#x9;&lt;/span&gt;&amp;nbsp; &amp;nbsp;constraintsGatheredByPoll_Request_Receive_Sat(PA,SA,M),&amp;nbsp;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;white-space: normal;&quot;&gt;&lt;span style=&quot;white-space:pre&quot;&gt;&#x9;&#x9;&lt;/span&gt;&amp;nbsp; &amp;nbsp;true, true).&lt;/span&gt;&lt;/div&gt;&lt;div&gt;prim_fluent(constraintsGatheredByPoll_Request_Receive_Sat(_,_,_)).&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;% Action for marking consumption of exogenous action by turning the [action_name]_Consumed fluent true.&amp;nbsp;&lt;/div&gt;&lt;div&gt;prim_action(constraintsGatheredByPoll_Request_Receive_Consume(_,_,_)).&lt;/div&gt;&lt;div&gt;poss(constraintsGatheredByPoll_Request_Receive_Consume(_,_,_),true).&lt;/div&gt;&lt;div&gt;causes_val(constraintsGatheredByPoll_Request_Receive_Consume(PA,SA,M),&amp;nbsp;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;white-space: normal;&quot;&gt;&lt;span style=&quot;white-space:pre&quot;&gt;&#x9;&#x9;&lt;/span&gt;&amp;nbsp; &amp;nbsp;constraintsGatheredByPoll_Request_Receive_Consumed(PA,SA,M),&amp;nbsp;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;white-space: normal;&quot;&gt;&lt;span style=&quot;white-space:pre&quot;&gt;&#x9;&#x9;&lt;/span&gt;&amp;nbsp; &amp;nbsp;true, true).&lt;/span&gt;&lt;/div&gt;&lt;div&gt;prim_fluent(constraintsGatheredByPoll_Request_Receive_Consumed(_,_,_)).&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;% Goal translation.&lt;/div&gt;&lt;div&gt;% Will be pursued if there is a received message (the _Sat fluent) that has not been consumed (the _Consumed fluent)&lt;/div&gt;&lt;div&gt;proc(constraintsGatheredByPollingTool,&amp;nbsp;&lt;/div&gt;&lt;div&gt;&amp;nbsp;&amp;nbsp; &amp;nbsp;[&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;white-space: normal;&quot;&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp;pi(pa,pi(sa,pi(m,[?(and([pollingToolAgent(pa),&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;white-space: normal;&quot;&gt;&lt;span style=&quot;white-space:pre&quot;&gt;&lt;span style=&quot;white-space: pre;&quot;&gt;&#x9;&lt;/span&gt;&#x9;&#x9;&lt;/span&gt; schedulingAgent(sa),&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;white-space: normal;&quot;&gt;&lt;span style=&quot;white-space:pre&quot;&gt;&#x9;&#x9;&#x9;&lt;/span&gt; meeting(m),&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;white-space: normal;&quot;&gt;&lt;span style=&quot;white-space:pre&quot;&gt;&#x9;&#x9;&#x9;&lt;/span&gt; constraintsGatheredByPoll_Request_Receive_Sat(pa,sa,m), % has been received&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;white-space: normal;&quot;&gt;&lt;span style=&quot;white-space:pre&quot;&gt;&#x9;&#x9;&#x9;&lt;/span&gt; neg(constraintsGatheredByPoll_Request_Receive_Consumed(pa,sa,m)) % not consumed yet&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;white-space: normal;&quot;&gt;&lt;span style=&quot;white-space:pre&quot;&gt;&#x9;&lt;span style=&quot;white-space: pre;&quot;&gt;&#x9;&lt;/span&gt;&#x9;&lt;/span&gt;])),&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;white-space: normal;&quot;&gt;&lt;span style=&quot;white-space:pre&quot;&gt;&#x9;&#x9;&lt;/span&gt;&amp;nbsp; constraintsGatheredByPoll_Request_Receive_Consume(pa,sa,m), % consume first!&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;white-space: normal;&quot;&gt;&lt;span style=&quot;white-space:pre&quot;&gt;&#x9;&#x9;&lt;/span&gt;&amp;nbsp; gatherConstraintsByPool(pa,sa,m)&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;white-space: normal;&quot;&gt;&lt;span style=&quot;white-space:pre&quot;&gt;&#x9;&#x9;&lt;/span&gt;&amp;nbsp;])))&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;white-space: normal;&quot;&gt;&amp;nbsp; &amp;nbsp;]&lt;/span&gt;&lt;/div&gt;&lt;div&gt;).&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;prim_action(gatherConstraintsByPool(_,_,_)).&lt;/div&gt;&lt;div&gt;poss(gatherConstraintsByPool(_,_,_),true).&lt;/div&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="610" width="910" x="930" y="270" as="geometry" />
+        </mxCell>
+        <mxCell id="pAowDUD0oEhH17143uuC-16" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Lucida Console;align=left;verticalAlign=top;" value="&lt;div&gt;% Send a call to the scheduling agent and starte the polling agent.&lt;/div&gt;&lt;div&gt;proc(main, conc(constraintsGathered(schedAgent,budgetMeeting),paMain)).&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;% SCHEDULING AGENT&lt;/div&gt;&lt;div&gt;% Both by email and by polling - does not make domain sense but added here for the demonstration&lt;/div&gt;&lt;div&gt;proc(constraintsGathered(SA,M), [constraintsGatheredByEmail(SA,M),constraintsGatheredByPoll(SA,M)]&lt;/div&gt;&lt;div&gt;).&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;% Perform a simple call&lt;/div&gt;&lt;div&gt;proc(constraintsGatheredByEmail(SA,M),&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;white-space: normal;&quot;&gt;&lt;span style=&quot;white-space:pre&quot;&gt;&#x9;&lt;/span&gt;pi(ca,[?(and([communicationAgent(ca),meeting(M),schedulingAgent(SA)])),constraintsGatheredByEmail(ca,SA,M)])&lt;/span&gt;&lt;/div&gt;&lt;div&gt;).&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;% Perform the message dispatch action for a server&lt;/div&gt;&lt;div&gt;proc(constraintsGatheredByPoll(SA,M),&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;white-space: normal;&quot;&gt;&lt;span style=&quot;white-space:pre&quot;&gt;&#x9;&lt;/span&gt;pi(pa,[?(pollingToolAgent(pa)),constraintsGatheredByPoll_Request_Send(pa,SA,M)])&lt;/span&gt;&lt;/div&gt;&lt;div&gt;).&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;% Message dispatch action. Execute adds it to the queue of messages to be sent.&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;prim_action(constraintsGatheredByPoll_Request_Send(_,_,_)).&lt;/div&gt;&lt;div&gt;poss(constraintsGatheredByPoll_Request_Send(_,_,_),true).&lt;/div&gt;&lt;div&gt;initially(constraintsGatheredByPoll_Request_Send_Sat(_,_,_),false).&lt;/div&gt;&lt;div&gt;causes_val(constraintsGatheredByPoll_Request_Send(PA,SA,M),&amp;nbsp;&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp;constraintsGatheredByPoll_Request_Send_Sat(PA,SA,M), true, true).&lt;/div&gt;&lt;div&gt;prim_fluent(constraintsGatheredByPoll_Request_Send_Sat(_,_,_)).&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="410" width="850" x="30" y="-460" as="geometry" />
+        </mxCell>
+        <object label="OR" concept="orDecomp" id="pAowDUD0oEhH17143uuC-17">
+          <mxCell edge="1" parent="1" source="pAowDUD0oEhH17143uuC-18" style="orthogonalLoop=1;jettySize=auto;html=1;fontSize=20;endArrow=open;endFill=0;endSize=17;strokeColor=#000000;curved=1;rounded=0;labelBackgroundColor=none;" target="pAowDUD0oEhH17143uuC-3">
+            <mxGeometry relative="1" x="0.0383" y="2" as="geometry">
+              <mxPoint as="offset" />
+              <mxPoint x="320" y="540" as="sourcePoint" />
+              <mxPoint x="430" y="110" as="targetPoint" />
+            </mxGeometry>
+          </mxCell>
+        </object>
+        <object label="Gather Constraints By Email(ca, sa, m)" concept="task" actor="default" id="pAowDUD0oEhH17143uuC-18">
+          <mxCell parent="1" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;fixedSize=1;strokeWidth=3;fontSize=15;size=20;fillColor=#d5e8d4;strokeColor=#688F51;" vertex="1">
+            <mxGeometry height="60" width="170" x="-120" y="410" as="geometry" />
+          </mxCell>
+        </object>
+        <object label="Gather Constraints By Pool(pa, sa, m)" concept="task" actor="default" id="pAowDUD0oEhH17143uuC-19">
+          <mxCell parent="1" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;fixedSize=1;strokeWidth=3;fontSize=15;size=20;fillColor=#d5e8d4;strokeColor=#688F51;" vertex="1">
+            <mxGeometry height="60" width="170" x="710" y="490" as="geometry" />
+          </mxCell>
+        </object>
+        <object label="OR" concept="orDecomp" id="pAowDUD0oEhH17143uuC-20">
+          <mxCell edge="1" parent="1" source="pAowDUD0oEhH17143uuC-19" style="orthogonalLoop=1;jettySize=auto;html=1;fontSize=20;endArrow=open;endFill=0;endSize=17;strokeColor=#000000;curved=1;rounded=0;labelBackgroundColor=none;" target="pAowDUD0oEhH17143uuC-4">
+            <mxGeometry relative="1" x="0.0383" y="2" as="geometry">
+              <mxPoint as="offset" />
+              <mxPoint x="1150" y="620" as="sourcePoint" />
+              <mxPoint x="843" y="420" as="targetPoint" />
+            </mxGeometry>
+          </mxCell>
+        </object>
+        <mxCell id="K3IAt7rBAPGeEGbYCnLd-1" parent="1" style="shape=callout;whiteSpace=wrap;html=1;perimeter=calloutPerimeter;position2=1;" value="act-tyle: &#39;called&#39;" vertex="1">
+          <mxGeometry height="80" width="130" x="-230" y="210" as="geometry" />
+        </mxCell>
+        <mxCell id="K3IAt7rBAPGeEGbYCnLd-2" parent="1" style="shape=callout;whiteSpace=wrap;html=1;perimeter=calloutPerimeter;position2=0.15;" value="act-tyle: &#39;triggered&#39;" vertex="1">
+          <mxGeometry height="80" width="130" x="780" y="290" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

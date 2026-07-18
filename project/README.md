@@ -1,5 +1,22 @@
 # Project Tasks
 
+
+## 2026-07-13 
+- Study the translation pattern under [docs/ver1.0/examples/translationpatterns](docs/ver1.0/examples/translationpatterns).
+	- [ ] Run the pattern.pl, using indigolog
+	- [ ] Read the code to observe how it works.
+- Turn the single-file solution to a multi-file solution using ZeroMQ and native indigolog devices.
+	- [ ] Break the pattern in two files. One with the scheduling and communication agent and one with the polling agent.
+	- [ ] Update execute (line 22) to transmit the message via sockets to the python adapter. 
+		- Python adapter sends to broker who then sends to python adapter of polling agent.
+	- [ ] The python adapter of polling agent causes an exogenous event to the Prolog polling agent it wraps. I believe there is a working pattern for this.
+	- There are three processes running: scheduling agent Prolog >>socket<< scheduling agent Python adapter >>ZeroMQ<< polling agent Polog-wrapping Python.
+	- Ideally the above are four: scheduling agent Prolog >>socket<< scheduling agent Python adapter >>ZeroMQ<< polling agent Python adapter >>socket<< polling agent Prolog.
+
+
+
+
+
 ## 2026-07-13 
 - Study the new grammar:
 	- [ ] Study the proposed changes in the grammar [docs/ver1.0/grammar/](docs/ver1.0/grammar/).
