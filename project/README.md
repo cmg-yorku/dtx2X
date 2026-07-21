@@ -1,6 +1,12 @@
 # Project Tasks
 
+## Week of August 4th TBD
+- [ ] Check the multi-agent integration solution proposed as per the email to the group.
+- [ ] Study the new grammar and re-familizarize yourself with your unmarshaller.
+- [ ] Finish the repo update tasks from the previous week.
+- There will be an updated grammar and class diagram.
 
+<!--
 ## 2026-07-13 
 - Study the translation pattern under [docs/ver1.0/examples/translationpatterns](docs/ver1.0/examples/translationpatterns).
 	- [ ] Run the pattern.pl, using indigolog
@@ -13,7 +19,7 @@
 	- There are three processes running: scheduling agent Prolog >>socket<< scheduling agent Python adapter >>ZeroMQ<< polling agent Polog-wrapping Python.
 	- Ideally the above are four: scheduling agent Prolog >>socket<< scheduling agent Python adapter >>ZeroMQ<< polling agent Python adapter >>socket<< polling agent Prolog.
 
-
+-->
 
 
 
