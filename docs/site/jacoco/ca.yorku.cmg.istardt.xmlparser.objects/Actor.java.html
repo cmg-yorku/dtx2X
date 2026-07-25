@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Actor.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">dtx2X</a> &gt; <a href="index.source.html" class="el_package">ca.yorku.cmg.istardt.xmlparser.objects</a> &gt; <span class="el_source">Actor.java</span></div><h1>Actor.java</h1><pre class="source lang-java linenums">package ca.yorku.cmg.istardt.xmlparser.objects;
+
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import ca.yorku.cmg.istardt.xmlparser.xml.deserializers.ActorDeserializer;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@JsonDeserialize(using = ActorDeserializer.class)
+public class Actor extends Element {
+    private List&lt;Goal&gt; goals;
+    private List&lt;Task&gt; tasks;
+    private List&lt;Effect&gt; effects;
+    private List&lt;Quality&gt; qualities;
+    private List&lt;Condition&gt; conditions;
+    private List&lt;Predicate&gt; predicates;
+    private List&lt;Variable&gt; variables;
+    private CrossRunSet crossRunSet;
+    private ExportedSet exportedSet;
+    private InitializationSet initializationSet;
+
+<span class="fc" id="L22">    public Actor() {</span>
+<span class="fc" id="L23">        this.goals = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L24">        this.tasks = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L25">        this.qualities = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L26">        this.effects = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L27">        this.conditions = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L28">        this.predicates = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L29">        this.variables = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L30">    }</span>
+
+    public void setGoals(List&lt;Goal&gt; goals) {
+<span class="fc" id="L33">        this.goals = goals;</span>
+<span class="fc" id="L34">    }</span>
+
+    public List&lt;Goal&gt; getGoals() {
+<span class="fc" id="L37">        return goals;</span>
+    }
+
+    public void setTasks(List&lt;Task&gt; tasks) {
+<span class="fc" id="L41">        this.tasks = tasks;</span>
+<span class="fc" id="L42">    }</span>
+
+    public List&lt;Task&gt; getTasks() {
+<span class="fc" id="L45">        return tasks;</span>
+    }
+
+    public void setEffects(List&lt;Effect&gt; effects) {
+<span class="fc" id="L49">        this.effects = effects;</span>
+<span class="fc" id="L50">    }</span>
+
+    public List&lt;Effect&gt; getEffects() {
+<span class="fc" id="L53">        return effects;</span>
+    }
+
+    public void setQualities(List&lt;Quality&gt; qualities) {
+<span class="fc" id="L57">        this.qualities = qualities;</span>
+<span class="fc" id="L58">    }</span>
+
+    public List&lt;Quality&gt; getQualities() {
+<span class="fc" id="L61">        return qualities;</span>
+    }
+
+    public List&lt;Condition&gt; getConditions() {
+<span class="fc" id="L65">        return conditions;</span>
+    }
+
+    public void setConditions(List&lt;Condition&gt; conditions) {
+<span class="fc" id="L69">        this.conditions = conditions;</span>
+<span class="fc" id="L70">    }</span>
+
+    public List&lt;Predicate&gt; getPredicates() {
+<span class="fc" id="L73">        return predicates;</span>
+    }
+
+    public void setPredicates(List&lt;Predicate&gt; predicates) {
+<span class="fc" id="L77">        this.predicates = predicates;</span>
+<span class="fc" id="L78">    }</span>
+
+    public List&lt;Variable&gt; getVariables() {
+<span class="fc" id="L81">        return variables;</span>
+    }
+
+    public void setVariables(List&lt;Variable&gt; variables) {
+<span class="fc" id="L85">        this.variables = variables;</span>
+<span class="fc" id="L86">    }</span>
+
+    public CrossRunSet getCrossRunSet() {
+<span class="fc" id="L89">        return crossRunSet;</span>
+    }
+
+    public List&lt;Element&gt; getCrossRunSetElements() {
+<span class="fc" id="L93">        return crossRunSet.getElements();</span>
+    }
+
+    public void setCrossRunSet(CrossRunSet crossRunSet) {
+<span class="fc" id="L97">        this.crossRunSet = crossRunSet;</span>
+<span class="fc" id="L98">    }</span>
+
+    public ExportedSet getExportedSet() {
+<span class="fc" id="L101">        return exportedSet;</span>
+    }
+
+    public List&lt;Element&gt; getExportedSetElements() {
+<span class="fc" id="L105">        List&lt;Element&gt; exportElements = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L106" title="All 2 branches covered.">        for (Export e : exportedSet.getExports()){</span>
+<span class="fc" id="L107">            exportElements.add(e.getElement());</span>
+<span class="fc" id="L108">        }</span>
+<span class="fc" id="L109">        return exportElements;</span>
+    }
+
+    public void setExportedSet(ExportedSet exportedSet) {
+<span class="fc" id="L113">        this.exportedSet = exportedSet;</span>
+<span class="fc" id="L114">    }</span>
+
+    public InitializationSet getInitializationSet() {
+<span class="fc" id="L117">        return initializationSet;</span>
+    }
+
+    public List&lt;Element&gt; getInitializationSetElements() {
+<span class="fc" id="L121">        List&lt;Element&gt; initElements = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L122" title="All 2 branches covered.">        for (Initialization e : initializationSet.getInitializations()){</span>
+<span class="fc" id="L123">            initElements.add(e.getElement());</span>
+<span class="fc" id="L124">        }</span>
+<span class="fc" id="L125">        return initElements;</span>
+    }
+
+    public void setInitializationSet(InitializationSet initializationSet) {
+<span class="fc" id="L129">        this.initializationSet = initializationSet;</span>
+<span class="fc" id="L130">    }</span>
+
+    /**
+     * Gets the root element among the goals.
+     *
+     * @return The root element, or null if not found
+     */
+    public Goal getGoalRoot() {
+<span class="pc bpc" id="L138" title="1 of 2 branches missed.">        if (goals != null) {</span>
+<span class="pc bpc" id="L139" title="1 of 2 branches missed.">            for (Goal goal : goals) {</span>
+<span class="fc bfc" id="L140" title="All 2 branches covered.">                if (goal.isRoot()) {</span>
+<span class="fc" id="L141">                    return goal;</span>
+                }
+<span class="fc" id="L143">            }</span>
+        }
+<span class="nc" id="L145">        return null;</span>
+    }
+
+    /**
+     * Gets the root element among the qualities.
+     *
+     * @return The root element, or null if not found
+     */
+    public Quality getQualityRoot() {
+<span class="pc bpc" id="L154" title="1 of 2 branches missed.">        if (qualities != null) {</span>
+<span class="pc bpc" id="L155" title="1 of 2 branches missed.">            for (Quality quality : qualities) {</span>
+<span class="fc bfc" id="L156" title="All 2 branches covered.">                if (quality.isRoot()) {</span>
+<span class="fc" id="L157">                    return quality;</span>
+                }
+<span class="fc" id="L159">            }</span>
+        }
+<span class="nc" id="L161">        return null;</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="nc" id="L166">        return &quot;Actor{id=&quot; + getId() +</span>
+<span class="nc bnc" id="L167" title="All 2 branches missed.">                &quot;, effectCount=&quot; + (effects != null ? effects.size() : 0) +</span>
+<span class="nc bnc" id="L168" title="All 2 branches missed.">                &quot;, taskCount=&quot; + (tasks != null ? tasks.size() : 0) +</span>
+<span class="nc bnc" id="L169" title="All 2 branches missed.">                &quot;, qualityCount=&quot; + (qualities != null ? qualities.size() : 0) +</span>
+<span class="nc bnc" id="L170" title="All 2 branches missed.">                &quot;, goalCount=&quot; + (goals != null ? goals.size() : 0) +</span>
+<span class="nc bnc" id="L171" title="All 2 branches missed.">                &quot;, conditionCount=&quot; + (conditions != null ? conditions.size() : 0) +</span>
+<span class="nc bnc" id="L172" title="All 2 branches missed.">                &quot;, variableCount=&quot; + (variables != null ? variables.size() : 0) +</span>
+<span class="nc bnc" id="L173" title="All 2 branches missed.">                &quot;, predicateCount=&quot; + (predicates != null ? predicates.size() : 0) + &quot;}&quot;;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,449 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FormulaNodeVisitorImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">dtx2X</a> &gt; <a href="index.source.html" class="el_package">ca.yorku.cmg.istardt.xmlparser.xml.formula</a> &gt; <span class="el_source">FormulaNodeVisitorImpl.java</span></div><h1>FormulaNodeVisitorImpl.java</h1><pre class="source lang-java linenums">package ca.yorku.cmg.istardt.xmlparser.xml.formula;
+
+import ca.yorku.cmg.istardt.xmlparser.objects.*;
+import ca.yorku.cmg.istardt.xmlparser.xml.ReferenceResolver;
+import ca.yorku.cmg.istardt.xmlparser.xml.utils.CustomLogger;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonNode;
+
+import java.io.IOException;
+import java.util.*;
+import java.util.function.BiFunction;
+
+public class FormulaNodeVisitorImpl implements FormulaNodeVisitor {
+<span class="fc" id="L15">    private static final CustomLogger LOGGER = CustomLogger.getInstance();</span>
+
+<span class="fc" id="L17">    private static final String[] NUMERIC_OPERAND_TYPES = {</span>
+            &quot;numConst&quot;, &quot;variableID&quot;, &quot;qualID&quot;, &quot;predicateID&quot;, &quot;goalID&quot;, &quot;taskID&quot;, &quot;effectID&quot;, &quot;conditionID&quot;,
+            &quot;add&quot;, &quot;subtract&quot;, &quot;multiply&quot;, &quot;divide&quot;, &quot;negate&quot;, &quot;previous&quot;
+    };
+
+<span class="fc" id="L22">    private static final String[] BOOLEAN_OPERAND_TYPES = {</span>
+            &quot;boolConst&quot;, &quot;predicateID&quot;, &quot;goalID&quot;, &quot;taskID&quot;, &quot;effectID&quot;, &quot;conditionID&quot;,
+            &quot;and&quot;, &quot;or&quot;, &quot;not&quot;, &quot;gt&quot;, &quot;gte&quot;, &quot;lt&quot;, &quot;lte&quot;, &quot;eq&quot;, &quot;neq&quot;, &quot;previous&quot;
+    };
+    private final JsonParser parser;
+    private final DeserializationContext context;
+<span class="fc" id="L28">    private final ReferenceResolver referenceResolver = ReferenceResolver.getInstance();</span>
+
+    // Maps to match node types to visitor methods
+<span class="fc" id="L31">    private final Map&lt;String, OperandVisitor&gt; operandVisitors = new HashMap&lt;&gt;();</span>
+
+<span class="fc" id="L33">    public FormulaNodeVisitorImpl(JsonParser parser, DeserializationContext context) {</span>
+<span class="fc" id="L34">        this.parser = parser;</span>
+<span class="fc" id="L35">        this.context = context;</span>
+<span class="fc" id="L36">        initializeOperandVisitors();</span>
+<span class="fc" id="L37">    }</span>
+
+    /**
+     * Initialize the map of operand visitors
+     */
+    private void initializeOperandVisitors() {
+<span class="fc" id="L43">        operandVisitors.put(&quot;numConst&quot;, this::visitNumConst);</span>
+<span class="fc" id="L44">        operandVisitors.put(&quot;boolConst&quot;, this::visitBoolConst);</span>
+
+<span class="fc" id="L46">        operandVisitors.put(&quot;predicateID&quot;, this::visitPredicateID);</span>
+<span class="fc" id="L47">        operandVisitors.put(&quot;goalID&quot;, this::visitGoalID);</span>
+<span class="fc" id="L48">        operandVisitors.put(&quot;taskID&quot;, this::visitTaskID);</span>
+<span class="fc" id="L49">        operandVisitors.put(&quot;variableID&quot;, this::visitVariableID);</span>
+<span class="fc" id="L50">        operandVisitors.put(&quot;qualID&quot;, this::visitQualID);</span>
+<span class="fc" id="L51">        operandVisitors.put(&quot;effectID&quot;, this::visitEffectID);</span>
+<span class="fc" id="L52">        operandVisitors.put(&quot;conditionID&quot;, this::visitConditionID);</span>
+
+<span class="fc" id="L54">        operandVisitors.put(&quot;add&quot;, this::visitAdd);</span>
+<span class="fc" id="L55">        operandVisitors.put(&quot;subtract&quot;, this::visitSubtract);</span>
+<span class="fc" id="L56">        operandVisitors.put(&quot;multiply&quot;, this::visitMultiply);</span>
+<span class="fc" id="L57">        operandVisitors.put(&quot;divide&quot;, this::visitDivide);</span>
+<span class="fc" id="L58">        operandVisitors.put(&quot;gt&quot;, this::visitGreaterThan);</span>
+<span class="fc" id="L59">        operandVisitors.put(&quot;gte&quot;, this::visitGreaterThanEquals);</span>
+<span class="fc" id="L60">        operandVisitors.put(&quot;lt&quot;, this::visitLessThan);</span>
+<span class="fc" id="L61">        operandVisitors.put(&quot;lte&quot;, this::visitLessThanEquals);</span>
+<span class="fc" id="L62">        operandVisitors.put(&quot;eq&quot;, this::visitEquals);</span>
+<span class="fc" id="L63">        operandVisitors.put(&quot;neq&quot;, this::visitNotEquals);</span>
+<span class="fc" id="L64">        operandVisitors.put(&quot;and&quot;, this::visitAnd);</span>
+<span class="fc" id="L65">        operandVisitors.put(&quot;or&quot;, this::visitOr);</span>
+<span class="fc" id="L66">        operandVisitors.put(&quot;not&quot;, this::visitNot);</span>
+<span class="fc" id="L67">        operandVisitors.put(&quot;previous&quot;, this::visitPrevious);</span>
+<span class="fc" id="L68">        operandVisitors.put(&quot;negate&quot;, this::visitNegate);</span>
+<span class="fc" id="L69">    }</span>
+
+    @Override
+    public Formula visitNumConst(JsonNode node) {
+<span class="fc" id="L73">        return new NumericConstant(Float.valueOf(node.asText()));</span>
+    }
+
+    @Override
+    public Formula visitBoolConst(JsonNode node) {
+<span class="fc" id="L78">        return new BooleanConstant(Boolean.parseBoolean(node.asText()));</span>
+    }
+
+    @Override
+    public Formula visitPredicateID(JsonNode node) {
+<span class="fc" id="L83">        String name = node.asText();</span>
+<span class="fc" id="L84">        Element element = referenceResolver.getElementByName(name);</span>
+<span class="pc bpc" id="L85" title="2 of 4 branches missed.">        if (element != null &amp;&amp; element instanceof Predicate) {</span>
+<span class="fc" id="L86">            LOGGER.info(getClass(), &quot;Found predicate with name: &quot; + name);</span>
+<span class="fc" id="L87">            return element.getAtom();</span>
+        } else {
+<span class="nc" id="L89">            LOGGER.error(getClass(), &quot;Predicate with name not found: &quot; + name);</span>
+<span class="nc" id="L90">            return Formula.createConstantFormula(&quot;Unknown PredicateID&quot;);</span>
+        }
+    }
+
+    @Override
+    public Formula visitGoalID(JsonNode node) {
+<span class="fc" id="L96">        String name = node.asText();</span>
+<span class="fc" id="L97">        Element element = referenceResolver.getElementByName(name);</span>
+<span class="pc bpc" id="L98" title="2 of 4 branches missed.">        if (element != null &amp;&amp; element instanceof Goal) {</span>
+<span class="fc" id="L99">            LOGGER.info(getClass(), &quot;Found goal with name: &quot; + name);</span>
+<span class="fc" id="L100">            return element.getAtom();</span>
+        } else {
+<span class="nc" id="L102">            LOGGER.error(getClass(), &quot;Goal with name not found: &quot; + name);</span>
+<span class="nc" id="L103">            return Formula.createConstantFormula(&quot;Unknown GoalID&quot;);</span>
+        }
+    }
+
+    @Override
+    public Formula visitTaskID(JsonNode node) {
+<span class="fc" id="L109">        String name = node.asText();</span>
+<span class="fc" id="L110">        Element element = referenceResolver.getElementByName(name);</span>
+<span class="pc bpc" id="L111" title="2 of 4 branches missed.">        if (element != null &amp;&amp; element instanceof Task) {</span>
+<span class="fc" id="L112">            LOGGER.info(getClass(), &quot;Found task with name: &quot; + name);</span>
+<span class="fc" id="L113">            return element.getAtom();</span>
+        } else {
+<span class="nc" id="L115">            LOGGER.error(getClass(), &quot;Task with name not found: &quot; + name);</span>
+<span class="nc" id="L116">            return Formula.createConstantFormula(&quot;Unknown TaskID&quot;);</span>
+        }
+    }
+
+    @Override
+    public Formula visitVariableID(JsonNode node) {
+<span class="fc" id="L122">        String name = node.asText();</span>
+<span class="fc" id="L123">        Element element = referenceResolver.getElementByName(name);</span>
+<span class="pc bpc" id="L124" title="2 of 4 branches missed.">        if (element != null &amp;&amp; element instanceof Variable) {</span>
+<span class="fc" id="L125">            LOGGER.info(getClass(), &quot;Found variable with name: &quot; + name);</span>
+<span class="fc" id="L126">            return element.getAtom();</span>
+        } else {
+<span class="nc" id="L128">            LOGGER.error(getClass(), &quot;Variable with name not found: &quot; + name);</span>
+<span class="nc" id="L129">            return Formula.createConstantFormula(&quot;Unknown VariableID&quot;);</span>
+        }
+    }
+
+    @Override
+    public Formula visitQualID(JsonNode node) {
+<span class="fc" id="L135">        String name = node.asText();</span>
+<span class="fc" id="L136">        Element element = referenceResolver.getElementByName(name);</span>
+<span class="pc bpc" id="L137" title="2 of 4 branches missed.">        if (element != null &amp;&amp; element instanceof Quality) {</span>
+<span class="fc" id="L138">            LOGGER.info(getClass(), &quot;Found quality with name: &quot; + name);</span>
+<span class="fc" id="L139">            return element.getAtom();</span>
+        } else {
+<span class="nc" id="L141">            LOGGER.error(getClass(), &quot;Quality with name not found: &quot; + name);</span>
+<span class="nc" id="L142">            return Formula.createConstantFormula(&quot;Unknown QualityID&quot;);</span>
+        }
+    }
+
+    @Override
+    public Formula visitEffectID(JsonNode node) {
+<span class="fc" id="L148">        String name = node.asText();</span>
+<span class="fc" id="L149">        Element element = referenceResolver.getElementByName(name);</span>
+<span class="pc bpc" id="L150" title="2 of 4 branches missed.">        if (element != null &amp;&amp; element instanceof Effect) {</span>
+<span class="fc" id="L151">            LOGGER.info(getClass(), &quot;Found effect with name: &quot; + name);</span>
+<span class="fc" id="L152">            return element.getAtom();</span>
+        } else {
+<span class="nc" id="L154">            LOGGER.error(getClass(), &quot;Effect with name not found: &quot; + name);</span>
+<span class="nc" id="L155">            return Formula.createConstantFormula(&quot;Unknown EffectID&quot;);</span>
+        }
+    }
+
+    @Override
+    public Formula visitConditionID(JsonNode node) {
+<span class="fc" id="L161">        String name = node.asText();</span>
+<span class="fc" id="L162">        Element element = referenceResolver.getElementByName(name);</span>
+<span class="pc bpc" id="L163" title="2 of 4 branches missed.">        if (element != null &amp;&amp; element instanceof Condition) {</span>
+<span class="fc" id="L164">            LOGGER.info(getClass(), &quot;Found condition with name: &quot; + name);</span>
+<span class="fc" id="L165">            return element.getAtom();</span>
+        } else {
+<span class="nc" id="L167">            LOGGER.error(getClass(), &quot;Condition with name not found: &quot; + name);</span>
+<span class="nc" id="L168">            return Formula.createConstantFormula(&quot;Unknown ConditionID&quot;);</span>
+        }
+    }
+
+    @Override
+    public Formula visitAdd(JsonNode node) throws IOException {
+<span class="fc" id="L174">        return visitMultiOperator(node, PlusOperator::new, Formula.createConstantFormula(&quot;0&quot;),</span>
+                this::collectNumericOperands);
+    }
+
+    @Override
+    public Formula visitSubtract(JsonNode node) throws IOException {
+<span class="fc" id="L180">        return visitBinaryOperator(node, MinusOperator::new, Formula.createConstantFormula(&quot;0&quot;));</span>
+    }
+
+    @Override
+    public Formula visitMultiply(JsonNode node) throws IOException {
+<span class="fc" id="L185">        return visitMultiOperator(node, MultiplyOperator::new, Formula.createConstantFormula(&quot;1&quot;),</span>
+                this::collectNumericOperands);
+    }
+
+    @Override
+    public Formula visitDivide(JsonNode node) throws IOException {
+<span class="fc" id="L191">        return visitBinaryOperator(node, DivideOperator::new, Formula.createConstantFormula(&quot;1&quot;));</span>
+    }
+
+    @Override
+    public Formula visitPrevious(JsonNode node) throws IOException {
+<span class="fc" id="L196">        LOGGER.info(&quot;Visiting Previous node: &quot; + node);</span>
+
+<span class="fc" id="L198">        String[] ids = {&quot;predicateID&quot;, &quot;goalID&quot;, &quot;taskID&quot;, &quot;variableID&quot;, &quot;qualID&quot;, &quot;effectID&quot;, &quot;conditionID&quot;};</span>
+
+        // Check if any ID fields exist in the node
+<span class="pc bpc" id="L201" title="1 of 2 branches missed.">        for (String type : ids) {</span>
+<span class="fc bfc" id="L202" title="All 2 branches covered.">            if (node.has(type)) {</span>
+<span class="fc" id="L203">                LOGGER.info(getClass(), &quot;Found &quot; + type + &quot; in Previous node&quot;);</span>
+<span class="fc" id="L204">                String name = node.get(type).asText();</span>
+<span class="fc" id="L205">                Element element = referenceResolver.getElementByName(name);</span>
+<span class="pc bpc" id="L206" title="1 of 2 branches missed.">                if (element != null) {</span>
+<span class="fc" id="L207">                    LOGGER.info(getClass(), &quot;Creating PreviousOperator with Atom for: &quot; + name);</span>
+<span class="fc" id="L208">                    return new PreviousOperator(element.getAtom());</span>
+                } else {
+<span class="nc" id="L210">                    LOGGER.warning(getClass(), &quot;Element not found for &quot; + type + &quot;: &quot; + name);</span>
+<span class="nc" id="L211">                    return new PreviousOperator(Formula.createConstantFormula(name));</span>
+                }
+            }
+        }
+<span class="nc" id="L215">        LOGGER.warning(getClass(), &quot;Previous node has no valid name fields: &quot; + node);</span>
+<span class="nc" id="L216">        return Formula.createConstantFormula(&quot;Unknown Previous&quot;);</span>
+    }
+
+
+    @Override
+    public Formula visitNegate(JsonNode node) throws IOException {
+        // Process the first child element found
+<span class="pc bpc" id="L223" title="1 of 2 branches missed.">        for (Map.Entry&lt;String, OperandVisitor&gt; entry : operandVisitors.entrySet()) {</span>
+<span class="fc" id="L224">            String type = entry.getKey();</span>
+<span class="fc bfc" id="L225" title="All 2 branches covered.">            if (node.has(type)) {</span>
+<span class="fc" id="L226">                Formula formula = visitOperandByType(type, node.get(type));</span>
+<span class="fc" id="L227">                return new NegateOperator(formula);</span>
+            }
+<span class="fc" id="L229">        }</span>
+<span class="nc" id="L230">        LOGGER.error(getClass(), &quot;No valid operand found in negate operation&quot;);</span>
+<span class="nc" id="L231">        return Formula.createConstantFormula(&quot;0&quot;);</span>
+    }
+
+    @Override
+    public Formula visitGreaterThan(JsonNode node) throws IOException {
+<span class="fc" id="L236">        return visitBinaryOperator(node, GTOperator::new, Formula.createBooleanFormula(false));</span>
+    }
+
+    @Override
+    public Formula visitLessThan(JsonNode node) throws IOException {
+<span class="fc" id="L241">        return visitBinaryOperator(node, LTOperator::new, Formula.createBooleanFormula(false));</span>
+    }
+
+    @Override
+    public Formula visitLessThanEquals(JsonNode node) throws IOException {
+<span class="nc" id="L246">        return visitBinaryOperator(node, LTEOperator::new, Formula.createBooleanFormula(false));</span>
+    }
+
+    @Override
+    public Formula visitGreaterThanEquals(JsonNode node) throws IOException {
+<span class="nc" id="L251">        return visitBinaryOperator(node, GTEOperator::new, Formula.createBooleanFormula(false));</span>
+    }
+
+    @Override
+    public Formula visitEquals(JsonNode node) throws IOException {
+<span class="nc" id="L256">        return visitBinaryOperator(node, EQOperator::new, Formula.createBooleanFormula(false));</span>
+    }
+
+    @Override
+    public Formula visitNotEquals(JsonNode node) throws IOException {
+<span class="nc" id="L261">        return visitBinaryOperator(node, NEQOperator::new, Formula.createBooleanFormula(false));</span>
+    }
+
+    @Override
+    public Formula visitAnd(JsonNode node) throws IOException {
+<span class="fc" id="L266">        return visitMultiOperator(node, ANDOperator::new, Formula.createBooleanFormula(true),</span>
+                this::collectBooleanOperands);
+    }
+
+    @Override
+    public Formula visitOr(JsonNode node) throws IOException {
+<span class="fc" id="L272">        return visitMultiOperator(node, OROperator::new, Formula.createBooleanFormula(false),</span>
+                this::collectBooleanOperands);
+    }
+
+    private List&lt;Formula&gt; collectOperands(JsonNode node, String[] operandTypes) throws IOException {
+<span class="fc" id="L277">        List&lt;Formula&gt; operands = new ArrayList&lt;&gt;();</span>
+
+        // Create a set of valid types for quick lookup
+<span class="fc" id="L280">        Set&lt;String&gt; validTypes = new HashSet&lt;&gt;(Arrays.asList(operandTypes));</span>
+
+        // Iterate through the child nodes in the order they appear in the XML
+<span class="fc" id="L283">        Iterator&lt;Map.Entry&lt;String, JsonNode&gt;&gt; fields = node.fields();</span>
+<span class="fc bfc" id="L284" title="All 2 branches covered.">        while (fields.hasNext()) {</span>
+<span class="fc" id="L285">            Map.Entry&lt;String, JsonNode&gt; field = fields.next();</span>
+<span class="fc" id="L286">            String type = field.getKey();</span>
+<span class="fc" id="L287">            JsonNode childNode = field.getValue();</span>
+
+<span class="pc bpc" id="L289" title="1 of 2 branches missed.">            if (validTypes.contains(type)) {</span>
+<span class="fc" id="L290">                addNodeToOperands(childNode, operands,</span>
+                        n -&gt; {
+                            try {
+<span class="fc" id="L293">                                return visitOperandByType(type, n);</span>
+<span class="nc" id="L294">                            } catch (IOException e) {</span>
+<span class="nc" id="L295">                                LOGGER.error(getClass(), &quot;Error processing operand: &quot; + e.getMessage(), e);</span>
+<span class="nc" id="L296">                                return null;</span>
+                            }
+                        });
+            }
+<span class="fc" id="L300">        }</span>
+<span class="fc" id="L301">        return operands;</span>
+    }
+
+    @Override
+    public Formula visitNot(JsonNode node) throws IOException {
+<span class="pc bpc" id="L306" title="1 of 2 branches missed.">        for (String type : BOOLEAN_OPERAND_TYPES) {</span>
+<span class="fc bfc" id="L307" title="All 2 branches covered.">            if (node.has(type)) {</span>
+<span class="fc" id="L308">                Formula operand = visitOperandByType(type, node.get(type));</span>
+<span class="pc bpc" id="L309" title="1 of 2 branches missed.">                if (operand != null) {</span>
+<span class="fc" id="L310">                    return new NOTOperator(operand);</span>
+                }
+            }
+        }
+
+<span class="nc" id="L315">        return Formula.createBooleanFormula(false);</span>
+    }
+
+    /**
+     * Helper method for binary operators that take left and right operands.
+     *
+     * @param node The JSON node containing the operator data
+     * @param operatorFactory Function to create the specific operator type
+     * @param defaultValue Default value to return if operands are missing
+     * @return The formula representing the binary operation
+     */
+    private Formula visitBinaryOperator(
+            JsonNode node,
+            BiFunction&lt;Formula, Formula, Formula&gt; operatorFactory,
+            Formula defaultValue) throws IOException {
+<span class="pc bpc" id="L330" title="2 of 4 branches missed.">        if (node.has(&quot;left&quot;) &amp;&amp; node.has(&quot;right&quot;)) {</span>
+<span class="fc" id="L331">            Formula left = visitOperand(node.get(&quot;left&quot;));</span>
+<span class="fc" id="L332">            Formula right = visitOperand(node.get(&quot;right&quot;));</span>
+
+<span class="pc bpc" id="L334" title="2 of 4 branches missed.">            if (left != null &amp;&amp; right != null) {</span>
+<span class="fc" id="L335">                return operatorFactory.apply(left, right);</span>
+            }
+        }
+<span class="nc" id="L338">        return defaultValue;</span>
+    }
+
+    /**
+     * Helper method for operators that can take multiple operands (add, multiply, and, or).
+     *
+     * @param node The JSON node containing the operator data
+     * @param operatorFactory Function to create the specific operator type
+     * @param defaultValue Default value to return if no operands are found
+     * @param operandsCollector Function to collect operands
+     * @return The formula representing the operation with multiple operands
+     */
+    private Formula visitMultiOperator(
+            JsonNode node,
+            BiFunction&lt;Formula, Formula, Formula&gt; operatorFactory,
+            Formula defaultValue,
+            OperandsCollector operandsCollector) throws IOException {
+
+<span class="fc" id="L356">        List&lt;Formula&gt; operands = operandsCollector.collectOperands(node);</span>
+
+<span class="pc bpc" id="L358" title="1 of 2 branches missed.">        if (operands.size() &gt;= 2) {</span>
+<span class="fc" id="L359">            Formula result = operatorFactory.apply(operands.get(0), operands.get(1));</span>
+<span class="fc bfc" id="L360" title="All 2 branches covered.">            for (int i = 2; i &lt; operands.size(); i++) {</span>
+<span class="fc" id="L361">                result = operatorFactory.apply(result, operands.get(i));</span>
+            }
+<span class="fc" id="L363">            return result;</span>
+<span class="nc bnc" id="L364" title="All 2 branches missed.">        } else if (operands.size() == 1) {</span>
+<span class="nc" id="L365">            return operands.get(0);</span>
+        }
+
+<span class="nc" id="L368">        return defaultValue;</span>
+    }
+
+    /**
+     * Interface for operand visitors
+     */
+    @FunctionalInterface
+    private interface OperandVisitor {
+        Formula visit(JsonNode node) throws IOException;
+    }
+
+    /**
+     * Interface for operands collectors
+     */
+    @FunctionalInterface
+    private interface OperandsCollector {
+        List&lt;Formula&gt; collectOperands(JsonNode node) throws IOException;
+    }
+
+    /**
+     * Visits a child operand based on its type.
+     */
+    private Formula visitOperandByType(String type, JsonNode node) throws IOException {
+<span class="fc" id="L391">        OperandVisitor visitor = operandVisitors.get(type);</span>
+<span class="pc bpc" id="L392" title="1 of 2 branches missed.">        if (visitor != null) {</span>
+<span class="fc" id="L393">            return visitor.visit(node);</span>
+        }
+<span class="nc" id="L395">        return null;</span>
+    }
+
+    /**
+     * Helper method to visit an operand node and return the corresponding Formula.
+     */
+    private Formula visitOperand(JsonNode node) throws IOException {
+<span class="pc bpc" id="L402" title="1 of 2 branches missed.">        if (node == null) {</span>
+<span class="nc" id="L403">            return null;</span>
+        }
+
+<span class="pc bpc" id="L406" title="1 of 2 branches missed.">        for (Map.Entry&lt;String, OperandVisitor&gt; entry : operandVisitors.entrySet()) {</span>
+<span class="fc" id="L407">            String type = entry.getKey();</span>
+<span class="fc bfc" id="L408" title="All 2 branches covered.">            if (node.has(type)) {</span>
+<span class="fc" id="L409">                return visitOperandByType(type, node.get(type));</span>
+            }
+<span class="fc" id="L411">        }</span>
+<span class="nc" id="L412">        return Formula.createConstantFormula(&quot;Unknown&quot;);</span>
+    }
+
+    /**
+     * Helper method to collect numeric operands from a node.
+     */
+    private List&lt;Formula&gt; collectNumericOperands(JsonNode node) throws IOException {
+<span class="fc" id="L419">        return collectOperands(node, NUMERIC_OPERAND_TYPES);</span>
+    }
+
+    /**
+     * Helper method to collect boolean operands from a node.
+     */
+    private List&lt;Formula&gt; collectBooleanOperands(JsonNode node) throws IOException {
+<span class="fc" id="L426">        return collectOperands(node, BOOLEAN_OPERAND_TYPES);</span>
+    }
+
+    /**
+     * Helper to add one or more nodes to the operands list using a visitor method
+     */
+    private void addNodeToOperands(JsonNode node, List&lt;Formula&gt; operands,
+                                   java.util.function.Function&lt;JsonNode, Formula&gt; visitor) {
+<span class="fc bfc" id="L434" title="All 2 branches covered.">        if (node.isArray()) {</span>
+<span class="fc bfc" id="L435" title="All 2 branches covered.">            for (JsonNode item : node) {</span>
+<span class="fc" id="L436">                Formula formula = visitor.apply(item);</span>
+<span class="pc bpc" id="L437" title="1 of 2 branches missed.">                if (formula != null) {</span>
+<span class="fc" id="L438">                    operands.add(formula);</span>
+                }
+<span class="fc" id="L440">            }</span>
+        } else {
+<span class="fc" id="L442">            Formula formula = visitor.apply(node);</span>
+<span class="pc bpc" id="L443" title="1 of 2 branches missed.">            if (formula != null) {</span>
+<span class="fc" id="L444">                operands.add(formula);</span>
+            }
+        }
+<span class="fc" id="L447">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DeserializerUtils.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">dtx2X</a> &gt; <a href="index.source.html" class="el_package">ca.yorku.cmg.istardt.xmlparser.xml.utils</a> &gt; <span class="el_source">DeserializerUtils.java</span></div><h1>DeserializerUtils.java</h1><pre class="source lang-java linenums">package ca.yorku.cmg.istardt.xmlparser.xml.utils;
+
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonNode;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+/**
+ * Enhanced utility class providing common methods for deserializers.
+ */
+<span class="nc" id="L16">public class DeserializerUtils {</span>
+<span class="fc" id="L17">    private static final CustomLogger LOGGER = CustomLogger.getInstance();</span>
+
+    /**
+     * Deserializes a node or array of nodes into a list of objects.
+     * Handles both single items and arrays transparently.
+     */
+    public static &lt;T&gt; List&lt;T&gt; deserializeList(JsonNode nodes, JsonParser parser,
+                                              DeserializationContext ctxt, Class&lt;T&gt; type) throws IOException {
+<span class="fc" id="L25">        List&lt;T&gt; result = new ArrayList&lt;&gt;();</span>
+
+<span class="pc bpc" id="L27" title="1 of 2 branches missed.">        if (nodes == null) {</span>
+<span class="nc" id="L28">            return result;</span>
+        }
+
+        try {
+<span class="fc bfc" id="L32" title="All 2 branches covered.">            if (nodes.isArray()) {</span>
+<span class="fc bfc" id="L33" title="All 2 branches covered.">                for (JsonNode node : nodes) {</span>
+<span class="fc" id="L34">                    T item = ctxt.readValue(node.traverse(parser.getCodec()), type);</span>
+<span class="pc bpc" id="L35" title="1 of 2 branches missed.">                    if (item != null) {</span>
+<span class="fc" id="L36">                        result.add(item);</span>
+                    }
+<span class="fc" id="L38">                }</span>
+            } else {
+<span class="fc" id="L40">                T item = ctxt.readValue(nodes.traverse(parser.getCodec()), type);</span>
+<span class="pc bpc" id="L41" title="1 of 2 branches missed.">                if (item != null) {</span>
+<span class="fc" id="L42">                    result.add(item);</span>
+                }
+            }
+<span class="nc" id="L45">        } catch (IOException e) {</span>
+<span class="nc" id="L46">            LOGGER.error(&quot;Error deserializing list of &quot; + type.getSimpleName(), e);</span>
+<span class="nc" id="L47">            throw e;</span>
+<span class="fc" id="L48">        }</span>
+
+<span class="fc" id="L50">        return result;</span>
+    }
+
+    /**
+     * Safely extracts a string attribute from a node.
+     */
+    public static String getStringAttribute(JsonNode node, String attributeName, String defaultValue) {
+<span class="pc bpc" id="L57" title="1 of 4 branches missed.">        if (node == null || !node.has(attributeName)) {</span>
+<span class="fc" id="L58">            return defaultValue;</span>
+        }
+<span class="fc" id="L60">        return node.get(attributeName).asText(defaultValue).trim();</span>
+    }
+
+    /**
+     * Safely extracts a boolean attribute from a node.
+     */
+    public static boolean getBooleanAttribute(JsonNode node, String attributeName, boolean defaultValue) {
+<span class="pc bpc" id="L67" title="1 of 4 branches missed.">        if (node == null || !node.has(attributeName)) {</span>
+<span class="fc" id="L68">            return defaultValue;</span>
+        }
+<span class="fc" id="L70">        return node.get(attributeName).asBoolean(defaultValue);</span>
+    }
+
+    /**
+     * Safely extracts a float attribute from a node.
+     */
+    public static float getFloatAttribute(JsonNode node, String attributeName, float defaultValue) {
+<span class="pc bpc" id="L77" title="2 of 4 branches missed.">        if (node == null || !node.has(attributeName)) {</span>
+<span class="nc" id="L78">            return defaultValue;</span>
+        }
+<span class="fc" id="L80">        return (float) node.get(attributeName).asDouble(defaultValue);</span>
+    }
+
+    /**
+     * Safely extracts an integer attribute from a node.
+     */
+    public static int getIntAttribute(JsonNode node, String attributeName, int defaultValue) {
+<span class="pc bpc" id="L87" title="1 of 4 branches missed.">        if (node == null || !node.has(attributeName)) {</span>
+<span class="fc" id="L88">            return defaultValue;</span>
+        }
+<span class="fc" id="L90">        return node.get(attributeName).asInt(defaultValue);</span>
+    }
+
+    /**
+     * Standardized error handling for deserialization.
+     */
+    public static void handleDeserializationError(Logger logger, String message, IOException e) throws IOException {
+<span class="nc" id="L97">        logger.log(Level.SEVERE, message, e);</span>
+<span class="nc" id="L98">        throw new IOException(message + &quot;: &quot; + e.getMessage(), e);</span>
+    }
+
+    /**
+     * Safely extracts a list of string values from child nodes with a specific name.
+     */
+    public static List&lt;String&gt; getStringList(JsonNode node, String childName) {
+<span class="fc" id="L105">        List&lt;String&gt; result = new ArrayList&lt;&gt;();</span>
+
+<span class="pc bpc" id="L107" title="1 of 4 branches missed.">        if (node == null || !node.has(childName)) {</span>
+<span class="fc" id="L108">            return result;</span>
+        }
+
+<span class="fc" id="L111">        JsonNode childNode = node.get(childName);</span>
+<span class="pc bpc" id="L112" title="1 of 2 branches missed.">        if (childNode.isArray()) {</span>
+<span class="nc bnc" id="L113" title="All 2 branches missed.">            for (JsonNode item : childNode) {</span>
+<span class="nc" id="L114">                result.add(item.asText());</span>
+<span class="nc" id="L115">            }</span>
+        } else {
+<span class="fc" id="L117">            result.add(childNode.asText());</span>
+        }
+
+<span class="fc" id="L120">        return result;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

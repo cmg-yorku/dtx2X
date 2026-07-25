@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BaseDeserializer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">dtx2X</a> &gt; <a href="index.source.html" class="el_package">ca.yorku.cmg.istardt.xmlparser.xml.deserializers</a> &gt; <span class="el_source">BaseDeserializer.java</span></div><h1>BaseDeserializer.java</h1><pre class="source lang-java linenums">package ca.yorku.cmg.istardt.xmlparser.xml.deserializers;
+
+import ca.yorku.cmg.istardt.xmlparser.objects.Atom;
+import ca.yorku.cmg.istardt.xmlparser.objects.Element;
+import ca.yorku.cmg.istardt.xmlparser.xml.ReferenceResolver;
+import ca.yorku.cmg.istardt.xmlparser.xml.utils.CustomLogger;
+import ca.yorku.cmg.istardt.xmlparser.xml.utils.DeserializerUtils;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+/**
+ * Base deserializer with common functionality for all iStarDT-X elements.
+ *
+ * @param &lt;T&gt; The type of element being deserialized, must extend Element
+ */
+public abstract class BaseDeserializer&lt;T extends Element&gt; extends StdDeserializer&lt;T&gt; {
+<span class="fc" id="L24">    private static final CustomLogger LOGGER = CustomLogger.getInstance();</span>
+
+    protected BaseDeserializer(Class&lt;T&gt; vc) {
+<span class="fc" id="L27">        super(vc);</span>
+<span class="fc" id="L28">    }</span>
+
+    /**
+     * Main deserialize method that sets up the standard deserializing process.
+     * Subclasses should override handleSpecificAttributes to add their customizations.
+     */
+    @Override
+    public T deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+<span class="fc" id="L36">        JsonNode node = p.getCodec().readTree(p);</span>
+
+        // Create and initialize element
+<span class="fc" id="L39">        T element = createNewElement();</span>
+
+        // Extract common attributes
+<span class="fc" id="L42">        extractCommonAttributes(element, node);</span>
+
+        // Handle specific attributes based on element type
+<span class="fc" id="L45">        handleSpecificAttributes(element, node, p, ctxt);</span>
+
+<span class="fc" id="L47">        LOGGER.info(getClass(), &quot;Deserialized &quot; + handledType().getSimpleName() + &quot; with name: &quot; + element.getName());</span>
+<span class="fc" id="L48">        return element;</span>
+    }
+
+    /**
+     * Create a new instance of the element being deserialized.
+     */
+    protected abstract T createNewElement();
+
+    /**
+     * Handle specific attributes for each element type.
+     */
+    protected abstract void handleSpecificAttributes(T element, JsonNode node, JsonParser p, DeserializationContext ctxt) throws IOException;
+
+    /**
+     * Extracts common attributes from a node and sets them on an element.
+     * Handles name, description, and ID.
+     *
+     * @param element The element to set attributes on
+     * @param node The JSON node to extract from
+     * @return The element with attributes set
+     */
+    protected T extractCommonAttributes(T element, JsonNode node) {
+        // Generate a UUID for the element ID if not provided
+<span class="fc" id="L71">        String id = DeserializerUtils.getStringAttribute(node, &quot;id&quot;, UUID.randomUUID().toString());</span>
+<span class="fc" id="L72">        element.setId(id);</span>
+
+        // Get the attributes from XML
+<span class="fc" id="L75">        String name = DeserializerUtils.getStringAttribute(node, &quot;name&quot;, &quot;&quot;);</span>
+<span class="fc" id="L76">        String description = DeserializerUtils.getStringAttribute(node, &quot;description&quot;, &quot;&quot;);</span>
+
+        // Create atom and add bidirectional relationship
+<span class="fc" id="L79">        Atom atom = createAtom(name, description);</span>
+<span class="fc" id="L80">        element.setRepresentation(atom);</span>
+<span class="fc" id="L81">        atom.setElement(element);</span>
+
+        // Register the element
+<span class="fc" id="L84">        registerElement(element);</span>
+
+<span class="fc" id="L86">        return element;</span>
+    }
+
+    /**
+     * Creates an Atom object from a name and description.
+     *
+     * @param name The ID for the atom
+     * @param description The description for the atom
+     * @return A new Atom object
+     */
+    protected Atom createAtom(String name, String description) {
+<span class="fc" id="L97">        Atom atom = new Atom();</span>
+<span class="fc" id="L98">        atom.setId(UUID.randomUUID().toString()); // atom's id != element's id</span>
+
+<span class="fc" id="L100">        atom.setTitleText(name);</span>
+<span class="fc" id="L101">        atom.setTitleHTMLText(&quot;&lt;h&gt;&quot; + name + &quot;&lt;/h&gt;&quot;);</span>
+
+<span class="pc bpc" id="L103" title="1 of 2 branches missed.">        if (description != null) {</span>
+<span class="fc" id="L104">            atom.setDescription(description);</span>
+        }
+<span class="fc" id="L106">        return atom;</span>
+    }
+
+    /**
+     * Registers the element in the reference resolver.
+     *
+     * @param element The element to register
+     */
+    protected void registerElement(T element) {
+<span class="pc bpc" id="L115" title="2 of 4 branches missed.">        if (element != null &amp;&amp; element.getId() != null) {</span>
+<span class="fc" id="L116">            ReferenceResolver.getInstance().registerElement(element.getId(), element);</span>
+        }
+<span class="fc" id="L118">    }</span>
+
+    /**
+     * Gets the value of a specific child node.
+     *
+     * @param node The parent JSON node
+     * @param fieldName The field name to look for
+     * @return The child node, or null if not found
+     */
+    protected JsonNode getChildNode(JsonNode node, String fieldName) {
+<span class="pc bpc" id="L128" title="1 of 2 branches missed.">        return node.has(fieldName) ? node.get(fieldName) : null;</span>
+    }
+
+    /**
+     * Extract references from nodes that may be single or array.
+     *
+     * @param node The node containing references
+     * @return List of reference strings
+     */
+    protected List&lt;String&gt; extractReferences(JsonNode node) {
+<span class="fc" id="L138">        List&lt;String&gt; refs = new ArrayList&lt;&gt;();</span>
+
+<span class="pc bpc" id="L140" title="1 of 2 branches missed.">        if (node.isArray()) {</span>
+<span class="fc bfc" id="L141" title="All 2 branches covered.">            for (JsonNode childNode : node) {</span>
+<span class="pc bpc" id="L142" title="1 of 2 branches missed.">                if (childNode.has(&quot;ref&quot;)) {</span>
+<span class="fc" id="L143">                    refs.add(childNode.get(&quot;ref&quot;).asText());</span>
+                }
+<span class="fc" id="L145">            }</span>
+<span class="nc bnc" id="L146" title="All 2 branches missed.">        } else if (node.has(&quot;ref&quot;)) {</span>
+<span class="nc" id="L147">            refs.add(node.get(&quot;ref&quot;).asText());</span>
+        }
+<span class="fc" id="L149">        return refs;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Goal.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">dtx2X</a> &gt; <a href="index.source.html" class="el_package">ca.yorku.cmg.istardt.xmlparser.objects</a> &gt; <span class="el_source">Goal.java</span></div><h1>Goal.java</h1><pre class="source lang-java linenums">package ca.yorku.cmg.istardt.xmlparser.objects;
+
+import ca.yorku.cmg.istardt.xmlparser.xml.deserializers.GoalDeserializer;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import java.util.ArrayList;
+import java.util.List;
+
+@JsonDeserialize(using = GoalDeserializer.class)
+public class Goal extends DecompositionElement {
+    private int runs;
+    private boolean root;
+    private List&lt;String&gt; childGoalRefs;
+    private List&lt;String&gt; childTaskRefs;
+    private Actor actor;
+
+    public Goal() {
+<span class="fc" id="L17">        super();</span>
+<span class="fc" id="L18">        this.childGoalRefs = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L19">        this.childTaskRefs = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L20">    }</span>
+
+    public int getRuns() {
+<span class="fc" id="L23">        return runs;</span>
+    }
+
+    public void setRuns(int runs) {
+<span class="fc" id="L27">        this.runs = runs;</span>
+<span class="fc" id="L28">    }</span>
+
+    public boolean isRoot() {
+<span class="fc" id="L31">        return root;</span>
+    }
+
+    public void setRoot(boolean root) {
+<span class="fc" id="L35">        this.root = root;</span>
+<span class="fc" id="L36">    }</span>
+
+    public List&lt;String&gt; getChildGoalRefs() {
+<span class="fc" id="L39">        return childGoalRefs;</span>
+    }
+
+    public void setChildGoalRefs(List&lt;String&gt; childGoalRefs) {
+<span class="fc" id="L43">        this.childGoalRefs = childGoalRefs;</span>
+<span class="fc" id="L44">    }</span>
+
+    public List&lt;String&gt; getChildTaskRefs() {
+<span class="fc" id="L47">        return childTaskRefs;</span>
+    }
+
+    public void setChildTaskRefs(List&lt;String&gt; childTaskRefs) {
+<span class="fc" id="L51">        this.childTaskRefs = childTaskRefs;</span>
+<span class="fc" id="L52">    }</span>
+
+    public void addChildGoalRef(String childGoalRef) {
+<span class="nc bnc" id="L55" title="All 2 branches missed.">        if (childGoalRefs == null) {</span>
+<span class="nc" id="L56">            childGoalRefs = new ArrayList&lt;&gt;();</span>
+        }
+<span class="nc" id="L58">        childGoalRefs.add(childGoalRef);</span>
+<span class="nc" id="L59">    }</span>
+
+    public void addChildTaskRef(String childTaskRef) {
+<span class="nc bnc" id="L62" title="All 2 branches missed.">        if (childTaskRefs == null) {</span>
+<span class="nc" id="L63">            childTaskRefs = new ArrayList&lt;&gt;();</span>
+        }
+<span class="nc" id="L65">        childTaskRefs.add(childTaskRef);</span>
+<span class="nc" id="L66">    }</span>
+
+    public Actor getActor() {
+<span class="nc" id="L69">        return actor;</span>
+    }
+
+    public void setActor(Actor actor) {
+<span class="nc" id="L73">        this.actor = actor;</span>
+<span class="nc" id="L74">    }</span>
+
+    @Override
+    public String toString() {
+<span class="nc" id="L78">        return &quot;Goal{id=&quot; + getId() +</span>
+                &quot;, root=&quot; + root +
+<span class="nc" id="L80">                &quot;, decompType=&quot; + getDecompType() +</span>
+                &quot;, runs=&quot; + runs +
+<span class="nc bnc" id="L82" title="All 2 branches missed.">                &quot;, childCount=&quot; + (getChildren() != null ? getChildren().size() : 0) +</span>
+<span class="nc bnc" id="L83" title="All 2 branches missed.">                &quot;, hasParent=&quot; + (getParent() != null) + &quot;}&quot;;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TaskDeserializer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">dtx2X</a> &gt; <a href="index.source.html" class="el_package">ca.yorku.cmg.istardt.xmlparser.xml.deserializers</a> &gt; <span class="el_source">TaskDeserializer.java</span></div><h1>TaskDeserializer.java</h1><pre class="source lang-java linenums">package ca.yorku.cmg.istardt.xmlparser.xml.deserializers;
+
+import ca.yorku.cmg.istardt.xmlparser.xml.utils.CustomLogger;
+import ca.yorku.cmg.istardt.xmlparser.xml.utils.DeserializerUtils;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonNode;
+import ca.yorku.cmg.istardt.xmlparser.objects.Effect;
+import ca.yorku.cmg.istardt.xmlparser.objects.Task;
+
+import java.io.IOException;
+import java.util.List;
+
+public class TaskDeserializer extends BaseDeserializer&lt;Task&gt; {
+<span class="fc" id="L15">    private static final CustomLogger LOGGER = CustomLogger.getInstance();</span>
+
+    public TaskDeserializer() {
+<span class="fc" id="L18">        super(Task.class);</span>
+<span class="fc" id="L19">    }</span>
+
+    @Override
+    protected Task createNewElement() {
+<span class="fc" id="L23">        return new Task();</span>
+    }
+
+    @Override
+    protected void handleSpecificAttributes(Task task, JsonNode node, JsonParser p, DeserializationContext ctxt) throws IOException {
+        // Store formula nodes for future processing
+<span class="fc bfc" id="L29" title="All 2 branches covered.">        if (node.has(&quot;pre&quot;)) {</span>
+<span class="fc" id="L30">            task.setRawPreFormulaNode(node.get(&quot;pre&quot;));</span>
+        }
+<span class="fc bfc" id="L32" title="All 2 branches covered.">        if (node.has(&quot;npr&quot;)) {</span>
+<span class="fc" id="L33">            task.setRawNprFormulaNode(node.get(&quot;npr&quot;));</span>
+        }
+        // Process effect group
+        try {
+<span class="pc bpc" id="L37" title="2 of 4 branches missed.">            if (node.has(&quot;effectGroup&quot;) &amp;&amp; node.get(&quot;effectGroup&quot;).has(&quot;effect&quot;)) {</span>
+<span class="fc" id="L38">                JsonNode effectGroupNode = node.get(&quot;effectGroup&quot;);</span>
+<span class="fc" id="L39">                JsonNode effectNodes = effectGroupNode.get(&quot;effect&quot;);</span>
+<span class="fc" id="L40">                LOGGER.info(getClass(),&quot;Processing effect group for task &quot; + task.getName());</span>
+<span class="fc" id="L41">                List&lt;Effect&gt; effects = DeserializerUtils.deserializeList(effectNodes, p, ctxt, Effect.class);</span>
+<span class="fc" id="L42">                task.setEffects(effects); // bidirectional relationship</span>
+<span class="fc" id="L43">                LOGGER.info(getClass(), &quot;Successfully processed &quot; + effects.size() + &quot; effects for task &quot; + task.getName());</span>
+            }
+<span class="nc" id="L45">        } catch (IOException e) {</span>
+<span class="nc" id="L46">            LOGGER.error(getClass(), &quot;Error processing effects for task &quot; + task.getName() + &quot;: &quot; + e.getMessage(), e);</span>
+<span class="fc" id="L47">        }</span>
+<span class="fc" id="L48">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

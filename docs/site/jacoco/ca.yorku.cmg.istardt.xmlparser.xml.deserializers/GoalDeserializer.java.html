@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GoalDeserializer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">dtx2X</a> &gt; <a href="index.source.html" class="el_package">ca.yorku.cmg.istardt.xmlparser.xml.deserializers</a> &gt; <span class="el_source">GoalDeserializer.java</span></div><h1>GoalDeserializer.java</h1><pre class="source lang-java linenums">package ca.yorku.cmg.istardt.xmlparser.xml.deserializers;
+
+import ca.yorku.cmg.istardt.xmlparser.xml.utils.DeserializerUtils;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonNode;
+import ca.yorku.cmg.istardt.xmlparser.objects.DecompType;
+import ca.yorku.cmg.istardt.xmlparser.objects.Goal;
+
+import java.io.IOException;
+
+public class GoalDeserializer extends BaseDeserializer&lt;Goal&gt; {
+
+    public GoalDeserializer() {
+<span class="fc" id="L15">        super(Goal.class);</span>
+<span class="fc" id="L16">    }</span>
+
+    @Override
+    protected Goal createNewElement() {
+<span class="fc" id="L20">        return new Goal();</span>
+    }
+
+    @Override
+    protected void handleSpecificAttributes(Goal goal, JsonNode node, JsonParser p, DeserializationContext ctxt) throws IOException {
+        // Set specific attributes
+<span class="fc" id="L26">        boolean root = DeserializerUtils.getBooleanAttribute(node, &quot;root&quot;, false);</span>
+<span class="fc" id="L27">        goal.setRoot(root);</span>
+
+        // Set episode length (runs)
+<span class="fc" id="L30">        int episodeLength = DeserializerUtils.getIntAttribute(node, &quot;episodeLength&quot;, 1);</span>
+<span class="fc" id="L31">        goal.setRuns(episodeLength);</span>
+
+        // Store formula nodes for future processing
+<span class="fc bfc" id="L34" title="All 2 branches covered.">        if (node.has(&quot;pre&quot;)) {</span>
+<span class="fc" id="L35">            goal.setRawPreFormulaNode(node.get(&quot;pre&quot;));</span>
+        }
+<span class="pc bpc" id="L37" title="1 of 2 branches missed.">        if (node.has(&quot;npr&quot;)) {</span>
+<span class="nc" id="L38">            goal.setRawNprFormulaNode(node.get(&quot;npr&quot;));</span>
+        }
+
+        // Process refinements
+<span class="fc" id="L42">        processRefinement(goal, getChildNode(node, &quot;refinement&quot;));</span>
+<span class="fc" id="L43">    }</span>
+
+    private void processRefinement(Goal goal, JsonNode refinementNode) {
+<span class="pc bpc" id="L46" title="1 of 2 branches missed.">        if (refinementNode == null) {</span>
+<span class="nc" id="L47">            return;</span>
+        }
+
+        // Set decomposition type
+<span class="fc" id="L51">        String type = DeserializerUtils.getStringAttribute(refinementNode, &quot;type&quot;, &quot;TERM&quot;);</span>
+<span class="fc bfc" id="L52" title="All 2 branches covered.">        if (&quot;AND&quot;.equalsIgnoreCase(type)) {</span>
+<span class="fc" id="L53">            goal.setDecompType(DecompType.AND);</span>
+<span class="pc bpc" id="L54" title="1 of 2 branches missed.">        } else if (&quot;OR&quot;.equalsIgnoreCase(type)) {</span>
+<span class="fc" id="L55">            goal.setDecompType(DecompType.OR);</span>
+        } else {
+<span class="nc" id="L57">            goal.setDecompType(DecompType.TERM);</span>
+        }
+
+        // Process child goal references
+<span class="fc bfc" id="L61" title="All 2 branches covered.">        if (refinementNode.has(&quot;childGoal&quot;)) {</span>
+<span class="fc" id="L62">            goal.setChildGoalRefs(extractReferences(refinementNode.get(&quot;childGoal&quot;)));</span>
+        }
+
+        // Process child task references
+<span class="fc bfc" id="L66" title="All 2 branches covered.">        if (refinementNode.has(&quot;childTask&quot;)) {</span>
+<span class="fc" id="L67">            goal.setChildTaskRefs(extractReferences(refinementNode.get(&quot;childTask&quot;)));</span>
+        }
+<span class="fc" id="L69">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

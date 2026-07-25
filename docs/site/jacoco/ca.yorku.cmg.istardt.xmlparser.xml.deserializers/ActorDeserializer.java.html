@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ActorDeserializer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">dtx2X</a> &gt; <a href="index.source.html" class="el_package">ca.yorku.cmg.istardt.xmlparser.xml.deserializers</a> &gt; <span class="el_source">ActorDeserializer.java</span></div><h1>ActorDeserializer.java</h1><pre class="source lang-java linenums">package ca.yorku.cmg.istardt.xmlparser.xml.deserializers;
+
+import ca.yorku.cmg.istardt.xmlparser.objects.*;
+import ca.yorku.cmg.istardt.xmlparser.xml.utils.CustomLogger;
+import ca.yorku.cmg.istardt.xmlparser.xml.utils.DeserializerUtils;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonNode;
+
+import java.io.IOException;
+import java.util.List;
+
+public class ActorDeserializer extends BaseDeserializer&lt;Actor&gt; {
+<span class="fc" id="L14">    private static final CustomLogger LOGGER = CustomLogger.getInstance();</span>
+
+    public ActorDeserializer() {
+<span class="fc" id="L17">        super(Actor.class);</span>
+<span class="fc" id="L18">    }</span>
+
+    @Override
+    protected Actor createNewElement() {
+<span class="fc" id="L22">        return new Actor();</span>
+    }
+
+    @Override
+    protected void handleSpecificAttributes(Actor actor, JsonNode node, JsonParser p, DeserializationContext ctxt) throws IOException {
+        // The name is already handled by the base deserializer in extractCommonAttributes
+        // which sets up the atom from the XML
+
+        try {
+            // Process predicates
+<span class="pc bpc" id="L32" title="2 of 4 branches missed.">            if (node.has(&quot;predicates&quot;) &amp;&amp; node.get(&quot;predicates&quot;).has(&quot;predicate&quot;)) {</span>
+<span class="fc" id="L33">                JsonNode predicatesNode = node.get(&quot;predicates&quot;).get(&quot;predicate&quot;);</span>
+<span class="fc" id="L34">                List&lt;Predicate&gt; predicates = DeserializerUtils.deserializeList(predicatesNode, p, ctxt, Predicate.class);</span>
+<span class="fc" id="L35">                actor.setPredicates(predicates);</span>
+<span class="fc" id="L36">                LOGGER.info(getClass(), &quot;Processed &quot; + predicates.size() + &quot; predicates&quot;);</span>
+            }
+
+            // Process variables
+<span class="pc bpc" id="L40" title="1 of 4 branches missed.">            if (node.has(&quot;variables&quot;) &amp;&amp; node.get(&quot;variables&quot;).has(&quot;variable&quot;)) {</span>
+<span class="fc" id="L41">                JsonNode variablesNode = node.get(&quot;variables&quot;).get(&quot;variable&quot;);</span>
+<span class="fc" id="L42">                List&lt;Variable&gt; variables = DeserializerUtils.deserializeList(variablesNode, p, ctxt, Variable.class);</span>
+<span class="fc" id="L43">                actor.setVariables(variables);</span>
+<span class="fc" id="L44">                LOGGER.info(getClass(), &quot;Processed &quot; + variables.size() + &quot; variables&quot;);</span>
+            }
+
+            // Process crossruns
+<span class="pc bpc" id="L48" title="2 of 4 branches missed.">            if (node.has(&quot;crossRuns&quot;) &amp;&amp; node.get(&quot;crossRuns&quot;).has(&quot;crossRun&quot;)) {</span>
+<span class="fc" id="L49">                JsonNode crossRunNodes = node.get(&quot;crossRuns&quot;).get(&quot;crossRun&quot;);</span>
+<span class="fc" id="L50">                CrossRunSet crossRunSet = new CrossRunSet();</span>
+<span class="fc" id="L51">                actor.setCrossRunSet(crossRunSet);</span>
+<span class="fc bfc" id="L52" title="All 2 branches covered.">                if (crossRunNodes.isArray()) {</span>
+<span class="fc bfc" id="L53" title="All 2 branches covered.">                    for (JsonNode crossRunNode : crossRunNodes) {</span>
+<span class="fc" id="L54">                        processCrossRunNode(crossRunNode, crossRunSet);</span>
+<span class="fc" id="L55">                    }</span>
+                } else {
+<span class="fc" id="L57">                    processCrossRunNode(crossRunNodes, crossRunSet);</span>
+                }
+<span class="fc" id="L59">                LOGGER.info(getClass(), &quot;Processed crossRuns&quot;);</span>
+            }
+
+            // Process exports
+<span class="pc bpc" id="L63" title="2 of 4 branches missed.">            if (node.has(&quot;exportedSet&quot;) &amp;&amp; node.get(&quot;exportedSet&quot;).has(&quot;export&quot;)) {</span>
+<span class="fc" id="L64">                JsonNode exportNodes = node.get(&quot;exportedSet&quot;).get(&quot;export&quot;);</span>
+<span class="fc" id="L65">                ExportedSet exportedSet = new ExportedSet();</span>
+<span class="fc" id="L66">                actor.setExportedSet(exportedSet);</span>
+<span class="fc bfc" id="L67" title="All 2 branches covered.">                if (exportNodes.isArray()) {</span>
+<span class="fc bfc" id="L68" title="All 2 branches covered.">                    for (JsonNode exportNode : exportNodes) {</span>
+<span class="fc" id="L69">                        processExportNode(exportNode, exportedSet);</span>
+<span class="fc" id="L70">                    }</span>
+                } else {
+<span class="fc" id="L72">                    processExportNode(exportNodes, exportedSet);</span>
+                }
+<span class="fc" id="L74">                LOGGER.info(getClass(), &quot;Processed ExportedSet&quot;);</span>
+            }
+
+            // Process initializations
+<span class="pc bpc" id="L78" title="1 of 4 branches missed.">            if (node.has(&quot;initializations&quot;) &amp;&amp; node.get(&quot;initializations&quot;).has(&quot;initialization&quot;)) {</span>
+<span class="fc" id="L79">                JsonNode initNodes = node.get(&quot;initializations&quot;).get(&quot;initialization&quot;);</span>
+<span class="fc" id="L80">                InitializationSet initializationSet = new InitializationSet();</span>
+<span class="fc" id="L81">                actor.setInitializationSet(initializationSet);</span>
+<span class="pc bpc" id="L82" title="1 of 2 branches missed.">                if (initNodes.isArray()) {</span>
+<span class="fc bfc" id="L83" title="All 2 branches covered.">                    for (JsonNode initNode : initNodes) {</span>
+<span class="fc" id="L84">                        processInitializationNode(initNode, initializationSet);</span>
+<span class="fc" id="L85">                    }</span>
+                } else {
+<span class="nc" id="L87">                    processInitializationNode(initNodes, initializationSet);</span>
+                }
+<span class="fc" id="L89">                LOGGER.info(getClass(), &quot;Processed Initializations&quot;);</span>
+            }
+
+            // Process condBoxes
+<span class="pc bpc" id="L93" title="1 of 4 branches missed.">            if (node.has(&quot;condBoxes&quot;) &amp;&amp; node.get(&quot;condBoxes&quot;).has(&quot;condBox&quot;)) {</span>
+<span class="fc" id="L94">                JsonNode preBoxesNode = node.get(&quot;condBoxes&quot;).get(&quot;condBox&quot;);</span>
+<span class="fc" id="L95">                List&lt;Condition&gt; conditions = DeserializerUtils.deserializeList(preBoxesNode, p, ctxt, Condition.class);</span>
+<span class="fc" id="L96">                actor.setConditions(conditions);</span>
+<span class="fc" id="L97">                LOGGER.info(getClass(), &quot;Processed &quot; + conditions.size() + &quot; condBoxes&quot;);</span>
+            }
+
+            // Process qualities
+<span class="pc bpc" id="L101" title="2 of 4 branches missed.">            if (node.has(&quot;qualities&quot;) &amp;&amp; node.get(&quot;qualities&quot;).has(&quot;quality&quot;)) {</span>
+<span class="fc" id="L102">                JsonNode qualitiesNode = node.get(&quot;qualities&quot;).get(&quot;quality&quot;);</span>
+<span class="fc" id="L103">                List&lt;Quality&gt; qualities = DeserializerUtils.deserializeList(qualitiesNode, p, ctxt, Quality.class);</span>
+<span class="fc" id="L104">                actor.setQualities(qualities);</span>
+<span class="fc" id="L105">                LOGGER.info(getClass(), &quot;Processed &quot; + qualities.size() + &quot; qualities&quot;);</span>
+            }
+
+            // Process goals
+<span class="pc bpc" id="L109" title="2 of 4 branches missed.">            if (node.has(&quot;goals&quot;) &amp;&amp; node.get(&quot;goals&quot;).has(&quot;goal&quot;)) {</span>
+<span class="fc" id="L110">                JsonNode goalsNode = node.get(&quot;goals&quot;).get(&quot;goal&quot;);</span>
+<span class="fc" id="L111">                List&lt;Goal&gt; goals = DeserializerUtils.deserializeList(goalsNode, p, ctxt, Goal.class);</span>
+<span class="fc" id="L112">                actor.setGoals(goals);</span>
+<span class="fc" id="L113">                LOGGER.info(getClass(), &quot;Processed &quot; + goals.size() + &quot; goals&quot;);</span>
+            }
+
+            // Process tasks
+<span class="pc bpc" id="L117" title="2 of 4 branches missed.">            if (node.has(&quot;tasks&quot;) &amp;&amp; node.get(&quot;tasks&quot;).has(&quot;task&quot;)) {</span>
+<span class="fc" id="L118">                JsonNode tasksNode = node.get(&quot;tasks&quot;).get(&quot;task&quot;);</span>
+<span class="fc" id="L119">                List&lt;Task&gt; tasks = DeserializerUtils.deserializeList(tasksNode, p, ctxt, Task.class);</span>
+<span class="fc" id="L120">                actor.setTasks(tasks);</span>
+<span class="fc" id="L121">                LOGGER.info(getClass(), &quot;Processed &quot; + tasks.size() + &quot; tasks&quot;);</span>
+
+            }
+<span class="nc" id="L124">        } catch (IOException e) {</span>
+<span class="nc bnc" id="L125" title="All 2 branches missed.">            String name = actor.getAtom() != null ? actor.getAtom().getTitleText() : actor.getId();</span>
+<span class="nc" id="L126">            LOGGER.error(getClass(), &quot;Error deserializing actor &quot; + name, e);</span>
+<span class="fc" id="L127">        }</span>
+<span class="pc bpc" id="L128" title="1 of 2 branches missed.">        String name = actor.getAtom() != null ? actor.getAtom().getTitleText() : actor.getId();</span>
+<span class="fc" id="L129">        LOGGER.info(getClass(), &quot;Deserialized actor: &quot; + name);</span>
+<span class="fc" id="L130">    }</span>
+
+    private void processCrossRunNode(JsonNode crossRunNode, CrossRunSet crossRunSet) {
+<span class="fc bfc" id="L133" title="All 2 branches covered.">        if (crossRunNode.has(&quot;qualID&quot;)) {</span>
+<span class="fc" id="L134">            String qualID = crossRunNode.get(&quot;qualID&quot;).asText();</span>
+<span class="fc" id="L135">            crossRunSet.addRefs(qualID);</span>
+<span class="fc" id="L136">            LOGGER.info(getClass(), &quot;Added quality reference to CrossRunSet: &quot; + qualID);</span>
+<span class="fc bfc" id="L137" title="All 2 branches covered.">        } else if (crossRunNode.has(&quot;predicateID&quot;)) {</span>
+<span class="fc" id="L138">            String predicateID = crossRunNode.get(&quot;predicateID&quot;).asText();</span>
+<span class="fc" id="L139">            crossRunSet.addRefs(predicateID);</span>
+<span class="fc" id="L140">            LOGGER.info(getClass(), &quot;Added predicate reference to CrossRunSet: &quot; + predicateID);</span>
+<span class="fc bfc" id="L141" title="All 2 branches covered.">        } else if (crossRunNode.has(&quot;variableID&quot;)) {</span>
+<span class="fc" id="L142">            String variableID = crossRunNode.get(&quot;variableID&quot;).asText();</span>
+<span class="fc" id="L143">            crossRunSet.addRefs(variableID);</span>
+<span class="fc" id="L144">            LOGGER.info(getClass(), &quot;Added variable reference to CrossRunSet: &quot; + variableID);</span>
+<span class="pc bpc" id="L145" title="1 of 2 branches missed.">        } else if (crossRunNode.has(&quot;conditionID&quot;)) {</span>
+<span class="fc" id="L146">            String conditionID = crossRunNode.get(&quot;conditionID&quot;).asText();</span>
+<span class="fc" id="L147">            crossRunSet.addRefs(conditionID);</span>
+<span class="fc" id="L148">            LOGGER.info(getClass(), &quot;Added condition reference to CrossRunSet: &quot; + conditionID);</span>
+<span class="fc" id="L149">        } else {</span>
+<span class="nc" id="L150">            LOGGER.warning(getClass(), &quot;Unknown reference type in CrossRun: &quot; + crossRunNode);</span>
+        }
+<span class="fc" id="L152">    }</span>
+
+    private void processExportNode(JsonNode exportNode, ExportedSet exportedSet) {
+<span class="fc" id="L155">        Export export = new Export();</span>
+<span class="fc" id="L156">        boolean continuous = DeserializerUtils.getBooleanAttribute(exportNode, &quot;continuous&quot;, false);</span>
+<span class="fc" id="L157">        export.setContinuous(continuous);</span>
+<span class="fc bfc" id="L158" title="All 2 branches covered.">        if (continuous) {</span>
+<span class="fc" id="L159">            float minVal = DeserializerUtils.getFloatAttribute(exportNode, &quot;minVal&quot;, 0.0f);</span>
+<span class="fc" id="L160">            float maxVal = DeserializerUtils.getFloatAttribute(exportNode, &quot;maxVal&quot;, 0.0f);</span>
+<span class="fc" id="L161">            export.setMinVal(minVal);</span>
+<span class="fc" id="L162">            export.setMaxVal(maxVal);</span>
+        }
+
+<span class="fc" id="L165">        String refValue = null;</span>
+<span class="fc bfc" id="L166" title="All 2 branches covered.">        if (exportNode.has(&quot;goalID&quot;)) {</span>
+<span class="fc" id="L167">            refValue = exportNode.get(&quot;goalID&quot;).asText();</span>
+<span class="fc bfc" id="L168" title="All 2 branches covered.">        } else if (exportNode.has(&quot;taskID&quot;)) {</span>
+<span class="fc" id="L169">            refValue = exportNode.get(&quot;taskID&quot;).asText();</span>
+<span class="fc bfc" id="L170" title="All 2 branches covered.">        } else if (exportNode.has(&quot;predicateID&quot;)) {</span>
+<span class="fc" id="L171">            refValue = exportNode.get(&quot;predicateID&quot;).asText();</span>
+<span class="pc bpc" id="L172" title="1 of 2 branches missed.">        } else if (exportNode.has(&quot;variableID&quot;)) {</span>
+<span class="nc" id="L173">            refValue = exportNode.get(&quot;variableID&quot;).asText();</span>
+<span class="fc bfc" id="L174" title="All 2 branches covered.">        } else if (exportNode.has(&quot;qualID&quot;)) {</span>
+<span class="fc" id="L175">            refValue = exportNode.get(&quot;qualID&quot;).asText();</span>
+<span class="pc bpc" id="L176" title="1 of 2 branches missed.">        } else if (exportNode.has(&quot;conditionID&quot;)) {</span>
+<span class="fc" id="L177">            refValue = exportNode.get(&quot;conditionID&quot;).asText();</span>
+        }
+
+<span class="pc bpc" id="L180" title="1 of 2 branches missed.">        if (refValue != null) {</span>
+<span class="fc" id="L181">            export.setRef(refValue);</span>
+<span class="fc" id="L182">            exportedSet.addExport(export);</span>
+<span class="fc" id="L183">            LOGGER.info(getClass(), &quot;Added export with reference: &quot; + refValue);</span>
+        } else {
+<span class="nc" id="L185">            LOGGER.warning(getClass(), &quot;Export node without a valid reference: &quot; + exportNode);</span>
+        }
+<span class="fc" id="L187">    }</span>
+    private void processInitializationNode(JsonNode initNode, InitializationSet initializationSet) {
+<span class="fc" id="L189">        Initialization initialization = new Initialization();</span>
+<span class="fc" id="L190">        String element = DeserializerUtils.getStringAttribute(initNode, &quot;element&quot;, null);</span>
+<span class="pc bpc" id="L191" title="1 of 2 branches missed.">        if (element != null) {</span>
+<span class="fc" id="L192">            initialization.setRef(element);</span>
+<span class="pc bpc" id="L193" title="1 of 2 branches missed.">            if (initNode.has(&quot;&quot;)) {</span>
+<span class="fc" id="L194">                initialization.setValue(initNode.get(&quot;&quot;).asText().trim());</span>
+            } else {
+<span class="nc" id="L196">                LOGGER.warning(getClass(), &quot;Initialization node without a value: &quot; + initNode);</span>
+<span class="nc" id="L197">                return; // skip</span>
+            }
+<span class="fc" id="L199">            initializationSet.addInitialization(initialization);</span>
+<span class="fc" id="L200">            LOGGER.info(getClass(), &quot;Added initialization for element: &quot; + element + &quot; with value: &quot; + initialization.getValue());</span>
+        } else {
+<span class="nc" id="L202">            LOGGER.error(getClass(), &quot;Initialization node without an element attribute: &quot; + initNode);</span>
+        }
+<span class="fc" id="L204">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
