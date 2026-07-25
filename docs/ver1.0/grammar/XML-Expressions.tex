@@ -47,14 +47,7 @@
 
 \textbf{[boolean-expression]} \> ::= \> [bool-const] | [atom] | [numeric-comparison] | [boolean-operation]\\
 \textbf{[bool-const]} \> ::= "<boolConst>" \textbf{[boolean]} "</boolConst>" \\
-\textbf{[atom]} \> ::= \> [predicate-ref] | \sout{[condition-id] |} \\ 
-\> \> [goal-ref] | [task-ref] \sout{| [effect-id]}\\
-%\textbf{[b-const-id]} \> ::= "<b-const-id>" \textbf{[identifier] "</b-const-id>"} \\
-\sout{\textbf{[predicate-id]}} \> ::= \sout{"<predicateID>" \textbf{[identifier]} "</predicateID>"} \\
-\sout{\textbf{[condition-id]}} \> ::= \sout{"<conditionID>" \textbf{[identifier]} "</conditionID>"} \\
-\sout{\textbf{[effect-id]}} \> \sout{::= "<effectID>" \textbf{[identifier]} "</effectID>"} \\
-\sout{\textbf{[goal-id]}} \> \sout{::= "<goalID>" \textbf{[identifier]} "</goalID>"} \\
-\sout{\textbf{[task-id]}} \> \sout{::= "<taskID>" \textbf{[identifier]} "</taskID>"} \\
+\textbf{[atom]} \> ::= \> [predicate-ref] | [goal-ref] | [task-ref] \\
 \textbf{[boolean-operation]} \> ::= \> \textbf{[and]} | \textbf{[or]} | \textbf{[not]} |  \textbf{[prev]}\\
 \textbf{[and]} \> ::= \> "<and>" \textbf{[boolean-expression] [boolean-expression]+} "</and>"\\
 \textbf{[or]}  \> ::=  \> "<or>" \textbf{[boolean-expression] [boolean-expression]+} "</or>"\\
