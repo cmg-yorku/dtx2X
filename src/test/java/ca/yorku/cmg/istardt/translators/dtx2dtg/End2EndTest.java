@@ -15,7 +15,8 @@ import org.junit.jupiter.api.Test;
 import ca.yorku.cmg.istardt.xmlparser.objects.Model;
 import ca.yorku.cmg.istardt.xmlparser.xml.IStarUnmarshaller;
 import ca.yorku.cmg.istardt.xmlparser.xml.utils.CustomLogger;
-import io.github.nina2dv.xmlvalidation.XmlValidation;
+import io.github.nina2dv.xmlvalidation.XmlValidationService;
+import io.github.nina2dv.xmlvalidation.ValidationResult;
 
 class End2EndTest {
 
@@ -68,10 +69,17 @@ class End2EndTest {
 				System.exit(1);
 			}
 
+			XmlValidationService validationService = new XmlValidationService();
+
 			// Validate XML against XSD schema
 			System.out.println("Validating XML against XSD schema...");
 			try {
-				XmlValidation.validate("xsd", xsdFile.getAbsolutePath(), xmlFile.getAbsolutePath());
+				ValidationResult xsdResult = validationService.validate("xsd", xsdFile.getAbsolutePath(), xmlFile.getAbsolutePath());
+				if (!xsdResult.isValid()) {
+					System.err.println("XSD validation failed:");
+					xsdResult.getErrors().forEach(error -> System.err.println(error.toString()));
+					System.exit(1);
+				}
 			} catch (Exception e) {
 				System.err.println("XSD validation failed:");
 				System.err.println(e.getMessage());
@@ -81,7 +89,12 @@ class End2EndTest {
 			// Validate XML against Schematron schema
 			System.out.println("Validating XML against Schematron schema...");
 			try {
-				XmlValidation.validate("schematron", schematronFile.getAbsolutePath(), xmlFile.getAbsolutePath());
+				ValidationResult schematronResult = validationService.validate("schematron", schematronFile.getAbsolutePath(), xmlFile.getAbsolutePath());
+				if (!schematronResult.isValid()) {
+					System.err.println("Schematron validation failed:");
+					schematronResult.getErrors().forEach(error -> System.err.println(error.toString()));
+					System.exit(1);
+				}
 			} catch (Exception e) {
 				System.err.println("Schematron validation failed:");
 				System.err.println(e.getMessage());
