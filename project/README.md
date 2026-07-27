@@ -1,5 +1,15 @@
 # Project Tasks
 
+
+## Additional tasks for August 4th TBD
+- See below for previous tasks.
+- There is a (much) updated grammar under [docs/ver1.0/grammar/](docs/ver1.0/grammar/).
+- The new grammar is presented in [docs/ver1.0/grammar/iStarX.md](docs/ver1.0/grammar/iStarX.md). The complete XSD is under [docs/ver1.0/grammar/iStarX.xsd](docs/ver1.0/grammar/iStarX.xsd)
+	- The two must stay syncronized.
+- What to do:
+	- [ ] Using `xjc` generate the class model.
+	- [ ] See if you can unmarshal `meetingScheduler.xml` into an in-memory object model without any customization and/or scope what work will be needed.
+
 ## Week of August 4th TBD
 - [ ] Check the multi-agent integration solution proposed as per the email to the group.
 - [ ] Study the new grammar and re-familizarize yourself with your unmarshaller.

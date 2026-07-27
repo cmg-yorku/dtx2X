@@ -1,3 +1,5 @@
+## Specification
+
 ### Primitives, Enums
 ##### BNF
 ```
@@ -953,4 +955,348 @@
        machinery itself, not declared here -->
 </xs:complexType>
 <xs:element name="iStarX" type="idn:istardtModelType"/>
+```
+
+
+## Class Diagram
+```mermaid
+classDiagram
+    class GoalMode
+    <<enumeration>> GoalMode
+    GoalMode : ACHIEVE
+    GoalMode : MAINTAIN
+    GoalMode : AVOID
+
+    class ActStyle
+    <<enumeration>> ActStyle
+    ActStyle : CALLED
+    ActStyle : TRIGGERED
+
+    class RefType
+    <<enumeration>> RefType
+    RefType : AND
+    RefType : OR
+
+    class ComparisonOp
+    <<enumeration>> ComparisonOp
+    ComparisonOp : GT
+    ComparisonOp : GTE
+    ComparisonOp : LT
+    ComparisonOp : LTE
+    ComparisonOp : EQ
+    ComparisonOp : NEQ
+
+    class TemporalFormula
+    <<abstract>> TemporalFormula
+    class BooleanExpression
+    <<abstract>> BooleanExpression
+    class AtomBool
+    <<abstract>> AtomBool
+    class NumericExpression
+    <<abstract>> NumericExpression
+
+    TemporalFormula <|-- BooleanExpression
+    BooleanExpression <|-- AtomBool
+
+    class BoolConst
+    BoolConst : boolean value
+
+    class NaryBooleanOp
+    NaryBooleanOp : List~BooleanExpression~ booleanExpression
+
+    class NotOp
+    NotOp : BooleanExpression booleanExpression
+
+    class ImpliesOp
+    ImpliesOp : BooleanExpression booleanExpression1
+    ImpliesOp : BooleanExpression booleanExpression2
+
+    class PreviousBoolOp
+    PreviousBoolOp : AtomBool atomBool
+
+    class ComparisonType
+    ComparisonType : Object left
+    ComparisonType : Object right
+    ComparisonType : ComparisonOp op
+
+    BooleanExpression <|-- BoolConst
+    BooleanExpression <|-- NaryBooleanOp
+    NaryBooleanOp <|-- And
+    NaryBooleanOp <|-- Or
+    BooleanExpression <|-- NotOp
+    BooleanExpression <|-- ImpliesOp
+    BooleanExpression <|-- PreviousBoolOp
+    BooleanExpression <|-- ComparisonType
+
+    class Predicate
+    Predicate : String name
+    Predicate : String description
+    Predicate : ParametersType parameters
+
+    class GoalRefType
+    GoalRefType : String name
+    GoalRefType : ParametersType parameters
+
+    class TaskRefType
+    TaskRefType : String name
+    TaskRefType : ParametersType parameters
+
+    class DefnRefType
+    DefnRefType : String name
+    DefnRefType : ParametersType parameters
+
+    AtomBool <|-- Predicate
+    AtomBool <|-- GoalRefType
+    AtomBool <|-- TaskRefType
+    AtomBool <|-- DefnRefType
+
+    class AlwaysOp
+    AlwaysOp : TemporalFormula temporalFormula
+    class EventuallyOp
+    EventuallyOp : TemporalFormula temporalFormula
+    class NextOp
+    NextOp : TemporalFormula temporalFormula
+    class UntilOp
+    UntilOp : TemporalFormula left
+    UntilOp : TemporalFormula right
+
+    TemporalFormula <|-- AlwaysOp
+    TemporalFormula <|-- EventuallyOp
+    TemporalFormula <|-- NextOp
+    TemporalFormula <|-- UntilOp
+
+    class NumConst
+    NumConst : BigDecimal value
+    class Variable
+    Variable : String name
+    Variable : String description
+    class QualityRefType
+    QualityRefType : String name
+    class PreviousOp
+    PreviousOp : Object atomOrVariableOrQuality
+    class NaryArithmeticOp
+    NaryArithmeticOp : List~Object~ operands
+    class BinaryArithmeticOp
+    BinaryArithmeticOp : Object left
+    BinaryArithmeticOp : Object right
+
+    NumericExpression <|-- NumConst
+    NumericExpression <|-- Variable
+    NumericExpression <|-- QualityRefType
+    NumericExpression <|-- PreviousOp
+    NumericExpression <|-- NaryArithmeticOp
+    NaryArithmeticOp <|-- Add
+    NaryArithmeticOp <|-- Multiply
+    NumericExpression <|-- BinaryArithmeticOp
+    BinaryArithmeticOp <|-- Subtract
+    BinaryArithmeticOp <|-- Divide
+
+    PreviousOp ..> AtomBool
+    PreviousOp ..> Variable
+    PreviousOp ..> QualityRefType
+    NaryArithmeticOp ..> NumericExpression
+    NaryArithmeticOp ..> AtomBool
+    BinaryArithmeticOp ..> NumericExpression
+    BinaryArithmeticOp ..> AtomBool
+    ComparisonType ..> NumericExpression
+    ComparisonType ..> AtomBool
+
+    class ParametersType
+    ParametersType : List~ParameterType~ parameter
+    class ParameterType
+    ParameterType : String paramType
+    ParameterType : String paramName
+    ParametersType *-- ParameterType
+
+    Predicate *-- ParametersType
+    GoalRefType *-- ParametersType
+    TaskRefType *-- ParametersType
+    DefnRefType *-- ParametersType
+
+    class GoalType
+    GoalType : String name
+    GoalType : GoalMode mode
+    GoalType : Boolean root
+    GoalType : ActStyle activationStyle
+    GoalType : String description
+    GoalType : Boolean terminal
+    GoalType : BigInteger episodeLength
+    GoalType : String actor
+    GoalType : ParametersType parameters
+    GoalType : PreType pre
+    GoalType : TriType tri
+    GoalType : GoalDefnType goalDefn
+    GoalType : RefinementType refinement
+
+    class PreType
+    PreType : BooleanExpression booleanExpression
+    class TriType
+    TriType : BooleanExpression booleanExpression
+    class GoalDefnType
+    GoalDefnType : ActivationType activation
+    GoalDefnType : FulfillmentType fulfillment
+    class ActivationType
+    ActivationType : BooleanExpression booleanExpression
+    class FulfillmentType
+    FulfillmentType : BooleanExpression booleanExpression
+    class RefinementType
+    RefinementType : RefType type
+    RefinementType : RefConditionType refCondition
+    RefinementType : List~Object~ childGoalOrChildTask
+    class RefConditionType
+    RefConditionType : CondContentType pickOrForall
+    class CondContentType
+    CondContentType : List~String~ param
+    CondContentType : Predicate condition
+
+    GoalType *-- ParametersType
+    GoalType *-- PreType
+    GoalType *-- TriType
+    GoalType *-- GoalDefnType
+    GoalType *-- RefinementType
+    GoalDefnType *-- ActivationType
+    GoalDefnType *-- FulfillmentType
+    RefinementType *-- RefConditionType
+    RefinementType ..> GoalRefType
+    RefinementType ..> TaskRefType
+    RefConditionType ..> CondContentType
+    CondContentType *-- Predicate
+
+    class TaskType
+    TaskType : String name
+    TaskType : String description
+    TaskType : String actor
+    TaskType : ActStyle activationStyle
+    TaskType : ParametersType parameters
+    TaskType : EffectGroupType effectGroup
+    TaskType : PreType pre
+    TaskType : TriType tri
+
+    class EffectGroupType
+    EffectGroupType : List~EffectType~ effect
+    class EffectContentType
+    EffectContentType : List~TurnsTrue~ turnsTrue
+    EffectContentType : List~TurnsFalse~ turnsFalse
+    EffectContentType : List~Set~ set
+    EffectContentType : PreType pre
+    class EffectType
+    EffectType : String name
+    EffectType : Boolean satisfying
+    EffectType : BigDecimal probability
+    EffectType : String description
+    class TurnsTrue
+    TurnsTrue : Predicate predicate
+    class TurnsFalse
+    TurnsFalse : Predicate predicate
+    class Set
+    Set : Variable variable
+    Set : NumConst numConst
+
+    EffectType --|> EffectContentType
+    TaskType *-- ParametersType
+    TaskType *-- EffectGroupType
+    TaskType *-- PreType
+    TaskType *-- TriType
+    EffectGroupType *-- EffectType
+    EffectContentType *-- TurnsTrue
+    EffectContentType *-- TurnsFalse
+    EffectContentType *-- Set
+    TurnsTrue *-- Predicate
+    TurnsFalse *-- Predicate
+    Set *-- Variable
+    Set *-- NumConst
+
+    class QualityType
+    QualityType : String name
+    QualityType : String description
+    QualityType : Boolean root
+    QualityType : NumericExpression numericExpression
+    QualityType *-- NumericExpression
+
+    class DefiniendumType
+    DefiniendumType : String name
+    DefiniendumType : ParametersType parameters
+    class Definiens
+    Definiens : BooleanExpression booleanExpression
+    class Definition
+    Definition : DefiniendumType definiendum
+    Definition : Definiens definiens
+
+    DefiniendumType *-- ParametersType
+    Definition *-- DefiniendumType
+    Definition *-- Definiens
+    Definiens *-- BooleanExpression
+
+    class CrossRun
+    CrossRun : Object predicateOrVariableOrQualityRef
+    class Export
+    Export : Object goalOrTaskOrQualityOrPredicateOrVariable
+    Export : Boolean continuous
+    Export : BigDecimal minVal
+    Export : BigDecimal maxVal
+    class BoolInit
+    BoolInit : Predicate predicate
+    BoolInit : Boolean value
+    class NumInit
+    NumInit : Object variableOrQualityRef
+    NumInit : BigDecimal value
+
+    CrossRun ..> Predicate
+    CrossRun ..> Variable
+    CrossRun ..> QualityRefType
+    Export ..> GoalRefType
+    Export ..> TaskRefType
+    Export ..> QualityRefType
+    Export ..> Predicate
+    Export ..> Variable
+    BoolInit *-- Predicate
+    NumInit ..> Variable
+    NumInit ..> QualityRefType
+
+    class ModelHeaderType
+    ModelHeaderType : String value
+    ModelHeaderType : String title
+    ModelHeaderType : String author
+    ModelHeaderType : String source
+    ModelHeaderType : String lastUpdated
+    class OptionsType
+    OptionsType : Boolean continuous
+    OptionsType : BigDecimal infeasibleActionPenalty
+    class ActorContentType
+    ActorContentType : List~GoalType~ goal
+    ActorContentType : List~TaskType~ task
+    ActorContentType : List~QualityType~ quality
+    class ActorType
+    ActorType : String name
+    ActorType : String description
+    class IstardtModelType
+    IstardtModelType : ModelHeaderType header
+    IstardtModelType : OptionsType options
+    IstardtModelType : List~ActorType~ actor
+    IstardtModelType : List~Predicate~ predicate
+    IstardtModelType : List~Variable~ variable
+    IstardtModelType : List~CrossRun~ crossRun
+    IstardtModelType : List~Export~ export
+    IstardtModelType : List~Object~ boolInitOrNumInit
+    IstardtModelType : List~Definition~ definition
+    IstardtModelType : List~Object~ invariant
+
+    ActorType --|> ActorContentType
+    IstardtModelType *-- ModelHeaderType
+    IstardtModelType *-- OptionsType
+    IstardtModelType *-- ActorType
+    IstardtModelType *-- Predicate
+    IstardtModelType *-- Variable
+    IstardtModelType *-- CrossRun
+    IstardtModelType *-- Export
+    IstardtModelType *-- Definition
+    ActorContentType *-- GoalType
+    ActorContentType *-- TaskType
+    ActorContentType *-- QualityType
+
+    GoalType --> GoalMode
+    GoalType --> ActStyle
+    TaskType --> ActStyle
+    RefinementType --> RefType
+    ComparisonType --> ComparisonOp
 ```
