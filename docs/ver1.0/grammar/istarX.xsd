@@ -1,0 +1,720 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:idn="urn:istarx:grammar:v1.0"
+           targetNamespace="urn:istarx:grammar:v1.0"
+           elementFormDefault="qualified">
+
+  <!-- ============================================================ -->
+  <!-- Primitives, Enums                                             -->
+  <!-- ============================================================ -->
+
+  <xs:simpleType name="identifier">
+    <xs:restriction base="xs:token">
+      <xs:pattern value="[a-z][A-Za-z0-9 ]*"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="comparisonOp">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="gt"/>
+      <xs:enumeration value="gte"/>
+      <xs:enumeration value="lt"/>
+      <xs:enumeration value="lte"/>
+      <xs:enumeration value="eq"/>
+      <xs:enumeration value="neq"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- ============================================================ -->
+  <!-- Parameters                                                    -->
+  <!-- ============================================================ -->
+
+  <xs:complexType name="parametersType">
+    <xs:sequence>
+      <xs:element name="parameter" type="idn:parameterType" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="parameters" type="idn:parametersType"/>
+
+  <xs:complexType name="parameterType">
+    <xs:sequence>
+      <xs:element name="paramType" type="idn:identifier" minOccurs ="0"/>
+      <xs:element name="paramName" type="idn:identifier"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- ============================================================ -->
+  <!-- Predicates and Variables                                      -->
+  <!-- ============================================================ -->
+
+  <xs:complexType name="predicateType">
+    <xs:sequence>
+      <xs:element ref="idn:parameters" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="name" type="idn:identifier" use="required"/>
+    <xs:attribute name="description" type="xs:string" use="optional"/>
+  </xs:complexType>
+
+  <!-- single element, used both for declarations under <predicates> and as an atom reference -->
+  <xs:element name="predicate" type="idn:predicateType" substitutionGroup="idn:atomBool"/>
+
+  <xs:element name="predicates">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="idn:predicate" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:complexType name="variableType">
+    <xs:attribute name="name" type="idn:identifier" use="required"/>
+    <xs:attribute name="description" type="xs:string" use="optional"/>
+  </xs:complexType>
+
+  <!-- single element, used both for declarations under <variables> and as a reference -->
+  <xs:element name="variable" type="idn:variableType" substitutionGroup="idn:numericExpression"/>
+
+  <xs:element name="variables">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="idn:variable" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <!-- ============================================================ -->
+  <!-- Boolean Expressions                                           -->
+  <!-- ============================================================ -->
+
+  <!-- Abstract head: every concrete expression node substitutes for this -->
+  <xs:element name="booleanExpression" type="xs:anyType" abstract="true"
+              substitutionGroup="idn:temporalFormula"/>
+
+  <xs:element name="boolConst" substitutionGroup="idn:booleanExpression" type="xs:boolean"/>
+
+  <xs:element name="atomBool" abstract="true" substitutionGroup="idn:booleanExpression"/>
+
+  <xs:complexType name="naryBooleanOp">
+    <xs:sequence>
+      <xs:element ref="idn:booleanExpression" minOccurs="2" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="and" substitutionGroup="idn:booleanExpression" type="idn:naryBooleanOp"/>
+  <xs:element name="or"  substitutionGroup="idn:booleanExpression" type="idn:naryBooleanOp"/>
+
+  <xs:complexType name="notOp">
+    <xs:sequence>
+      <xs:element ref="idn:booleanExpression"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="not" substitutionGroup="idn:booleanExpression" type="idn:notOp"/>
+
+  <xs:complexType name="impliesOp">
+    <xs:sequence>
+      <xs:element ref="idn:booleanExpression"/>
+      <xs:element ref="idn:booleanExpression"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="implies" substitutionGroup="idn:booleanExpression" type="idn:impliesOp"/>
+
+  <xs:complexType name="previousBoolOp">
+    <xs:sequence>
+      <xs:element ref="idn:atomBool"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="previousBool" substitutionGroup="idn:booleanExpression" type="idn:previousBoolOp"/>
+
+  <xs:complexType name="comparisonType">
+    <xs:sequence>
+      <xs:element name="left">
+        <xs:complexType><xs:group ref="idn:numericExpressionOrAtomBool"/></xs:complexType>
+      </xs:element>
+      <xs:element name="right">
+        <xs:complexType><xs:group ref="idn:numericExpressionOrAtomBool"/></xs:complexType>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="op" type="idn:comparisonOp" use="required"/>
+  </xs:complexType>
+  <xs:element name="numericComparison" substitutionGroup="idn:booleanExpression" type="idn:comparisonType"/>
+
+  <!-- ============================================================ -->
+  <!-- Numeric Expressions                                           -->
+  <!-- ============================================================ -->
+
+  <xs:element name="numericExpression" type="xs:anyType" abstract="true"/>
+
+  <xs:element name="numConst" substitutionGroup="idn:numericExpression" type="xs:decimal"/>
+
+  <!-- reusable fragment: boolean atom | variable | quality, used inside <previous> -->
+  <xs:group name="numAtomGroup">
+    <xs:choice>
+      <xs:element ref="idn:atomBool"/>
+      <xs:element ref="idn:variable"/>
+      <xs:element ref="idn:qualityRef"/>
+    </xs:choice>
+  </xs:group>
+
+  <xs:complexType name="previousOp">
+    <xs:group ref="idn:numAtomGroup"/>
+  </xs:complexType>
+  <xs:element name="previous" substitutionGroup="idn:numericExpression" type="idn:previousOp"/>
+
+  <!-- reusable fragment: any numeric-expression, OR any boolean atom (as 1/0) -->
+  <xs:group name="numericExpressionOrAtomBool">
+    <xs:choice>
+      <xs:element ref="idn:numericExpression"/>
+      <xs:element ref="idn:atomBool"/>
+    </xs:choice>
+  </xs:group>
+
+  <xs:complexType name="naryArithmeticOp">
+    <xs:sequence>
+      <xs:group ref="idn:numericExpressionOrAtomBool" minOccurs="2" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="add"      substitutionGroup="idn:numericExpression" type="idn:naryArithmeticOp"/>
+  <xs:element name="multiply" substitutionGroup="idn:numericExpression" type="idn:naryArithmeticOp"/>
+
+  <xs:complexType name="binaryArithmeticOp">
+    <xs:sequence>
+      <xs:element name="left">
+        <xs:complexType><xs:group ref="idn:numericExpressionOrAtomBool"/></xs:complexType>
+      </xs:element>
+      <xs:element name="right">
+        <xs:complexType><xs:group ref="idn:numericExpressionOrAtomBool"/></xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="subtract" substitutionGroup="idn:numericExpression" type="idn:binaryArithmeticOp"/>
+  <xs:element name="divide"   substitutionGroup="idn:numericExpression" type="idn:binaryArithmeticOp"/>
+
+  <!-- ============================================================ -->
+  <!-- Temporal Formulae                                             -->
+  <!-- ============================================================ -->
+
+  <xs:element name="temporalFormula" type="xs:anyType" abstract="true"/>
+
+  <xs:complexType name="alwaysOp">
+    <xs:sequence>
+      <xs:element ref="idn:temporalFormula"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="always" substitutionGroup="idn:temporalFormula" type="idn:alwaysOp"/>
+
+  <xs:complexType name="eventuallyOp">
+    <xs:sequence>
+      <xs:element ref="idn:temporalFormula"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="eventually" substitutionGroup="idn:temporalFormula" type="idn:eventuallyOp"/>
+
+  <xs:complexType name="nextOp">
+    <xs:sequence>
+      <xs:element ref="idn:temporalFormula"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="next" substitutionGroup="idn:temporalFormula" type="idn:nextOp"/>
+
+  <xs:complexType name="untilOp">
+    <xs:sequence>
+      <xs:element name="left">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="idn:temporalFormula"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="right">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="idn:temporalFormula"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="until" substitutionGroup="idn:temporalFormula" type="idn:untilOp"/>
+
+  <!-- ============================================================ -->
+  <!-- Goals                                                         -->
+  <!-- ============================================================ -->
+
+  <xs:simpleType name="goalMode">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="achieve"/>
+      <xs:enumeration value="maintain"/>
+      <xs:enumeration value="avoid"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="actStyle">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="called"/>
+      <xs:enumeration value="triggered"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="refType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="AND"/>
+      <xs:enumeration value="OR"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:complexType name="preType">
+    <xs:sequence>
+      <xs:element ref="idn:booleanExpression"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="pre" type="idn:preType"/>
+
+  <xs:complexType name="triType">
+    <xs:sequence>
+      <xs:element ref="idn:booleanExpression"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="tri" type="idn:triType"/>
+
+  <xs:complexType name="activationType">
+    <xs:sequence>
+      <xs:element ref="idn:booleanExpression"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="activation" type="idn:activationType"/>
+
+  <xs:complexType name="fulfillmentType">
+    <xs:sequence>
+      <xs:element ref="idn:booleanExpression"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="fulfillment" type="idn:fulfillmentType"/>
+
+  <xs:complexType name="goalDefnType">
+    <xs:sequence>
+      <xs:element ref="idn:activation"/>
+      <xs:element ref="idn:fulfillment"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="goal-defn" type="idn:goalDefnType"/>
+
+  <xs:element name="param" type="idn:identifier"/>
+
+  <xs:complexType name="condContentType">
+    <xs:sequence>
+      <xs:element name="params">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="idn:param" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="condition">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="idn:predicate"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:element name="pick" type="idn:condContentType"/>
+  <xs:element name="forall" type="idn:condContentType"/>
+
+  <xs:element name="ref-condition">
+    <xs:complexType>
+      <xs:choice>
+        <xs:element ref="idn:pick"/>
+        <xs:element ref="idn:forall"/>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:complexType name="goalType">
+    <xs:sequence>
+      <xs:element ref="idn:parameters" minOccurs="0"/>
+      <xs:element ref="idn:pre" minOccurs="0"/>
+      <xs:element ref="idn:tri" minOccurs="0"/>
+      <xs:element ref="idn:goal-defn" minOccurs="0"/>
+      <xs:element ref="idn:refinement" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="name" type="idn:identifier" use="required"/>
+    <xs:attribute name="mode" type="idn:goalMode" use="required"/>
+    <xs:attribute name="root" type="xs:boolean" use="optional"/>
+    <xs:attribute name="activationStyle" type="idn:actStyle" use="optional"/>
+    <xs:attribute name="description" type="xs:string" use="optional"/>
+    <xs:attribute name="terminal" type="xs:boolean" use="optional"/>
+    <xs:attribute name="episodeLength" type="xs:nonNegativeInteger" use="optional"/>
+    <xs:attribute name="actor" type="idn:identifier" use="optional"/>
+  </xs:complexType>
+  <xs:element name="goal" type="idn:goalType"/>
+
+  <xs:element name="goals">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="idn:goal" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:complexType name="goalRefType">
+    <xs:sequence>
+      <xs:element ref="idn:parameters" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="name" type="idn:identifier" use="required"/>
+  </xs:complexType>
+  <xs:element name="goalRef" substitutionGroup="idn:atomBool" type="idn:goalRefType"/>
+
+  <xs:complexType name="refinementType">
+    <xs:sequence>
+      <xs:element ref="idn:ref-condition" minOccurs="0"/>
+      <xs:choice minOccurs="1" maxOccurs="unbounded">
+        <xs:element ref="idn:goalRef"/>
+        <xs:element ref="idn:taskRef"/>
+      </xs:choice>
+    </xs:sequence>
+    <xs:attribute name="type" type="idn:refType" use="required"/>
+  </xs:complexType>
+  <xs:element name="refinement" type="idn:refinementType"/>
+
+  <!-- ============================================================ -->
+  <!-- Tasks                                                         -->
+  <!-- ============================================================ -->
+
+  <xs:element name="turnsTrue">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="idn:predicate"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="turnsFalse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="idn:predicate"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="set">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="idn:variable"/>
+        <xs:element ref="idn:numConst"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:complexType name="effectContentType">
+    <xs:sequence>
+      <xs:element ref="idn:turnsTrue" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element ref="idn:turnsFalse" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element ref="idn:set" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element ref="idn:pre" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="effectType">
+    <xs:complexContent>
+      <xs:extension base="idn:effectContentType">
+        <xs:attribute name="name" type="idn:identifier" use="required"/>
+        <xs:attribute name="satisfying" type="xs:boolean" use="optional"/>
+        <xs:attribute name="probability" type="xs:decimal" use="required"/>
+        <xs:attribute name="description" type="xs:string" use="optional"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="effect" type="idn:effectType"/>
+
+  <xs:complexType name="effectGroupType">
+    <xs:sequence>
+      <xs:element ref="idn:effect" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="effectGroup" type="idn:effectGroupType"/>
+
+  <xs:complexType name="taskType">
+    <xs:sequence>
+      <xs:element ref="idn:parameters" minOccurs="0"/>
+      <xs:element ref="idn:effectGroup"/>
+      <xs:element ref="idn:pre" minOccurs="0"/>
+      <xs:element ref="idn:tri" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="name" type="idn:identifier" use="required"/>
+    <xs:attribute name="description" type="xs:string" use="optional"/>
+    <xs:attribute name="actor" type="idn:identifier" use="optional"/>
+    <xs:attribute name="activationStyle" type="idn:actStyle" use="optional"/>
+  </xs:complexType>
+  <xs:element name="task" type="idn:taskType"/>
+
+  <xs:element name="tasks">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="idn:task" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:complexType name="taskRefType">
+    <xs:sequence>
+      <xs:element ref="idn:parameters" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="name" type="idn:identifier" use="required"/>
+  </xs:complexType>
+  <xs:element name="taskRef" substitutionGroup="idn:atomBool" type="idn:taskRefType"/>
+
+  <!-- ============================================================ -->
+  <!-- Qualities                                                     -->
+  <!-- ============================================================ -->
+
+  <xs:complexType name="qualityType">
+    <xs:sequence>
+      <xs:element ref="idn:numericExpression"/>
+    </xs:sequence>
+    <xs:attribute name="name" type="idn:identifier" use="required"/>
+    <xs:attribute name="description" type="xs:string" use="optional"/>
+    <xs:attribute name="root" type="xs:boolean" use="optional"/>
+  </xs:complexType>
+  <xs:element name="quality" type="idn:qualityType"/>
+
+  <xs:element name="qualities">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="idn:quality" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:complexType name="qualityRefType">
+    <xs:attribute name="name" type="idn:identifier" use="required"/>
+  </xs:complexType>
+  <xs:element name="qualityRef" substitutionGroup="idn:numericExpression" type="idn:qualityRefType"/>
+
+  <!-- ============================================================ -->
+  <!-- Invariants                                                    -->
+  <!-- ============================================================ -->
+
+  <xs:element name="invariant">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="idn:temporalFormula"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="invariants">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="idn:invariant" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <!-- ============================================================ -->
+  <!-- Cross-Runs                                                    -->
+  <!-- ============================================================ -->
+
+  <xs:group name="crossRunAtomGroup">
+    <xs:choice>
+      <xs:element ref="idn:predicate"/>
+      <xs:element ref="idn:variable"/>
+      <xs:element ref="idn:qualityRef"/>
+    </xs:choice>
+  </xs:group>
+
+  <xs:element name="crossRun">
+    <xs:complexType>
+      <xs:group ref="idn:crossRunAtomGroup"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="crossRuns">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="idn:crossRun" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <!-- ============================================================ -->
+  <!-- Exported Set                                                  -->
+  <!-- ============================================================ -->
+
+  <xs:group name="expIdGroup">
+    <xs:choice>
+      <xs:element ref="idn:goalRef"/>
+      <xs:element ref="idn:taskRef"/>
+      <xs:element ref="idn:qualityRef"/>
+      <xs:element ref="idn:predicate"/>
+      <xs:element ref="idn:variable"/>
+    </xs:choice>
+  </xs:group>
+
+  <xs:element name="export">
+    <xs:complexType>
+      <xs:group ref="idn:expIdGroup"/>
+      <xs:attribute name="continuous" type="xs:boolean" use="required"/>
+      <xs:attribute name="minVal" type="xs:decimal" use="optional"/>
+      <xs:attribute name="maxVal" type="xs:decimal" use="optional"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="exportedSet">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="idn:export" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <!-- ============================================================ -->
+  <!-- Initializations                                               -->
+  <!-- ============================================================ -->
+
+  <xs:group name="contInitIdGroup">
+    <xs:choice>
+      <xs:element ref="idn:variable"/>
+      <xs:element ref="idn:qualityRef"/>
+    </xs:choice>
+  </xs:group>
+
+  <xs:element name="boolInit">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="idn:predicate"/>
+      </xs:sequence>
+      <xs:attribute name="value" type="xs:boolean" use="required"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="numInit">
+    <xs:complexType>
+      <xs:group ref="idn:contInitIdGroup"/>
+      <xs:attribute name="value" type="xs:decimal" use="required"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="initializations">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:choice maxOccurs="unbounded">
+          <xs:element ref="idn:boolInit"/>
+          <xs:element ref="idn:numInit"/>
+        </xs:choice>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <!-- ============================================================ -->
+  <!-- Definitions                                                   -->
+  <!-- ============================================================ -->
+
+  <xs:complexType name="definiendumType">
+    <xs:sequence>
+      <xs:element ref="idn:parameters" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="name" type="idn:identifier" use="required"/>
+  </xs:complexType>
+  <xs:element name="definiendum" type="idn:definiendumType"/>
+
+  <xs:element name="definiens">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="idn:booleanExpression"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="definition">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="idn:definiendum"/>
+        <xs:element ref="idn:definiens"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="definitions">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="idn:definition" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:complexType name="defnRefType">
+    <xs:sequence>
+      <xs:element ref="idn:parameters" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="name" type="idn:identifier" use="required"/>
+  </xs:complexType>
+  <xs:element name="defnRef" substitutionGroup="idn:atomBool" type="idn:defnRefType"/>
+
+  <!-- ============================================================ -->
+  <!-- Root                                                          -->
+  <!-- ============================================================ -->
+
+  <xs:complexType name="modelHeaderType">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="title" type="xs:string" use="required"/>
+        <xs:attribute name="author" type="xs:string" use="required"/>
+        <xs:attribute name="source" type="xs:string" use="required"/>
+        <xs:attribute name="lastUpdated" type="xs:string" use="required"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:element name="header" type="idn:modelHeaderType"/>
+
+  <xs:complexType name="optionsType">
+    <xs:attribute name="continuous" type="xs:boolean" use="required"/>
+    <xs:attribute name="infeasibleActionPenalty" type="xs:decimal" use="required"/>
+  </xs:complexType>
+  <xs:element name="options" type="idn:optionsType"/>
+
+  <xs:complexType name="actorContentType">
+    <xs:sequence>
+      <xs:element ref="idn:goals" minOccurs="0"/>
+      <xs:element ref="idn:tasks" minOccurs="0"/>
+      <xs:element ref="idn:qualities" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="actorType">
+    <xs:complexContent>
+      <xs:extension base="idn:actorContentType">
+        <xs:attribute name="name" type="idn:identifier" use="required"/>
+        <xs:attribute name="description" type="xs:string" use="optional"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="actor" type="idn:actorType"/>
+
+  <xs:element name="actors">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="idn:actor" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:complexType name="istardtModelType">
+    <xs:sequence>
+      <xs:element ref="idn:header"/>
+      <xs:element ref="idn:options"/>
+      <xs:element ref="idn:actors"/>
+      <xs:element ref="idn:predicates" minOccurs="0"/>
+      <xs:element ref="idn:variables" minOccurs="0"/>
+      <xs:element ref="idn:crossRuns" minOccurs="0"/>
+      <xs:element ref="idn:exportedSet" minOccurs="0"/>
+      <xs:element ref="idn:initializations" minOccurs="0"/>
+      <xs:element ref="idn:definitions" minOccurs="0"/>
+      <xs:element ref="idn:invariants" minOccurs="0"/>
+    </xs:sequence>
+    <!-- xmlns / xmlns:xsi / xsi:schemaLocation are handled by XML namespace
+         machinery itself, not declared here -->
+  </xs:complexType>
+  <xs:element name="iStarX" type="idn:istardtModelType"/>
+
+</xs:schema>
