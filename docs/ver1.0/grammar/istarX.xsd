@@ -241,7 +241,8 @@
 
   <xs:simpleType name="goalMode">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="achieve"/>
+      <xs:enumeration value="achieve-active"/>
+	  <xs:enumeration value="achieve-passive"/>
       <xs:enumeration value="maintain"/>
       <xs:enumeration value="avoid"/>
     </xs:restriction>

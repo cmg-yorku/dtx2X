@@ -338,7 +338,7 @@
 					[" description=‘" [xs:string] "’"] [" terminal=‘" [xs:boolean] "’"]
 					[" episodeLength=‘" [xs:nonNegativeInteger] "’"] [" actor=‘" [identifier] "’"]
 					[goal-content] "</goal>"
-[goal-mode] 	::= ‘achieve’ | ‘maintain" | ‘avoid’
+[goal-mode] 	::= ‘achieve-active’ | ‘achieve-passive’ |‘maintain" | ‘avoid’
 [act-style] 	::= ‘called’ | ‘triggered’
 [goal-content]	::= [ [parameters] ] [ [pre] ] [ [tri] ] [ [goal-defn] ] [ [refinement] ]
 [pre]			::= "<pre>" [boolean-expression] "</pre>"
@@ -367,7 +367,8 @@
 
 <xs:simpleType name="goalMode">
   <xs:restriction base="xs:string">
-    <xs:enumeration value="achieve"/>
+    <xs:enumeration value="achieve-active"/>
+    <xs:enumeration value="achieve-passive"/>
     <xs:enumeration value="maintain"/>
     <xs:enumeration value="avoid"/>
   </xs:restriction>
