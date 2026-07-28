@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<iStarX xmlns="urn:istarx:grammar:v1.0">
+<iStarX xmlns="urn:istarx:grammar:v1.0"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="urn:istarx:grammar:v1.0 istarX.xsd">
 
   <header title="Meeting Scheduling Domain"
           author="user"
@@ -15,7 +17,7 @@
     <actor name="ms" description="Meeting Scheduler">
       <goals>
 
-        <goal name="haveMeetingScheduled" mode="achieve" root="true" actor="ms">
+        <goal name="haveMeetingScheduled" mode="achieve-active" root="true" actor="ms">
           <parameters>
             <parameter><paramType>actor</paramType><paramName>ms</paramName></parameter>
             <parameter><paramType>meeting</paramType><paramName>m</paramName></parameter>
@@ -36,7 +38,7 @@
           </refinement>
         </goal>
 
-        <goal name="collectConstraints" mode="achieve" actor="ms">
+        <goal name="collectConstraints" mode="achieve-active" actor="ms">
           <parameters>
             <parameter><paramType>actor</paramType><paramName>ms</paramName></parameter>
             <parameter><paramType>meeting</paramType><paramName>m</paramName></parameter>
@@ -57,7 +59,7 @@
           </refinement>
         </goal>
 
-        <goal name="collectConstraintsByEmail" mode="achieve" actor="ms">
+        <goal name="collectConstraintsByEmail" mode="achieve-active" actor="ms">
           <parameters>
             <parameter><paramType>actor</paramType><paramName>ms</paramName></parameter>
             <parameter><paramType>meeting</paramType><paramName>m</paramName></parameter>
